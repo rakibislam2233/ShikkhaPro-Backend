@@ -5,7 +5,8 @@ export type QuestionType =
   | 'mcq'
   | 'short-answer'
   | 'true-false'
-  | 'multiple-select';
+  | 'multiple-select'
+  | 'mixed';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type AcademicLevel =
   | 'class-1'
@@ -32,7 +33,7 @@ export interface IQuestion {
   difficulty: Difficulty;
   points: number;
   subject: string;
-  topic: string;
+  topic?: string;
   academicLevel: AcademicLevel;
   language: Language;
   category?: string;

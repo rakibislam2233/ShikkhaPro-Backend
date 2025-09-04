@@ -1,18 +1,18 @@
 import express from 'express';
-import { QuizAttemptController } from './quizAttempt.controller';
-import validateRequest from '../../shared/validateRequest';
 import auth from '../../middlewares/auth';
+import validateRequest from '../../shared/validateRequest';
+import { QuizAttemptController } from './quizAttempt.controller';
 import {
+  completeQuizAttemptValidation,
+  flagQuestionValidation,
+  getLeaderboardValidation,
+  getQuizAttemptValidation,
+  getQuizResultValidation,
+  getUserAttemptsValidation,
+  getUserStatsValidation,
+  saveAnswersValidation,
   startQuizAttemptValidation,
   submitAnswerValidation,
-  saveAnswersValidation,
-  flagQuestionValidation,
-  completeQuizAttemptValidation,
-  getQuizAttemptValidation,
-  getUserAttemptsValidation,
-  getQuizResultValidation,
-  getLeaderboardValidation,
-  getUserStatsValidation,
 } from './quizAttempt.validation';
 
 const router = express.Router();
@@ -20,35 +20,35 @@ const router = express.Router();
 // Quiz attempt management
 router.post(
   '/start',
-  auth(),
+  auth("User"),
   validateRequest(startQuizAttemptValidation),
   QuizAttemptController.startQuizAttempt
 );
 
 router.post(
   '/answer',
-  auth(),
+  auth("User"),
   validateRequest(submitAnswerValidation),
   QuizAttemptController.submitAnswer
 );
 
 router.post(
   '/save',
-  auth(),
+  auth("User"),
   validateRequest(saveAnswersValidation),
   QuizAttemptController.saveAnswers
 );
 
 router.post(
   '/flag',
-  auth(),
+  auth("User"),
   validateRequest(flagQuestionValidation),
   QuizAttemptController.flagQuestion
 );
 
 router.post(
   '/complete',
-  auth(),
+  auth("User"),
   validateRequest(completeQuizAttemptValidation),
   QuizAttemptController.completeQuizAttempt
 );
@@ -56,7 +56,7 @@ router.post(
 // Get attempt details
 router.get(
   '/my-attempts',
-  auth(),
+  auth("User"),
   validateRequest(getUserAttemptsValidation),
   QuizAttemptController.getUserAttempts
 );
@@ -68,14 +68,14 @@ router.get(
 
 router.get(
   '/:id',
-  auth(),
+  auth("User"),
   validateRequest(getQuizAttemptValidation),
   QuizAttemptController.getQuizAttemptById
 );
 
 router.get(
   '/:id/progress',
-  auth(),
+  auth("User"),
   validateRequest(getQuizAttemptValidation),
   QuizAttemptController.getAttemptProgress
 );
@@ -83,7 +83,7 @@ router.get(
 // Results
 router.get(
   '/result/:attemptId',
-  auth(),
+  auth("User"),
   validateRequest(getQuizResultValidation),
   QuizAttemptController.getQuizResult
 );
@@ -91,7 +91,7 @@ router.get(
 // Statistics and leaderboard
 router.get(
   '/stats/user',
-  auth(),
+  auth("User"),
   validateRequest(getUserStatsValidation),
   QuizAttemptController.getUserStats
 );
@@ -105,7 +105,7 @@ router.get(
 // Abandon attempt
 router.patch(
   '/:id/abandon',
-  auth(),
+  auth("User"),
   validateRequest(getQuizAttemptValidation),
   QuizAttemptController.abandonAttempt
 );

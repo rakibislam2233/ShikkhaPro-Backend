@@ -5,7 +5,7 @@ import {
   IQuizModel,
   Question,
   QuizConfig,
-  QuizSearchFilters
+  QuizSearchFilters,
 } from './quiz.interface';
 
 const questionSchema = new Schema<Question>({
@@ -26,7 +26,7 @@ const questionSchema = new Schema<Question>({
   options: {
     type: [String],
     validate: {
-      validator: function(this: Question, options: string[]) {
+      validator: function (this: Question, options: string[]) {
         if (this.type === 'mcq' || this.type === 'multiple-select') {
           return options && options.length >= 2;
         }
@@ -35,8 +35,9 @@ const questionSchema = new Schema<Question>({
         }
         return true;
       },
-      message: 'MCQ and multiple-select questions must have at least 2 options, true-false must have exactly 2 options'
-    }
+      message:
+        'MCQ and multiple-select questions must have at least 2 options, true-false must have exactly 2 options',
+    },
   },
   correctAnswer: {
     type: Schema.Types.Mixed,
@@ -66,7 +67,20 @@ const questionSchema = new Schema<Question>({
 const quizConfigSchema = new Schema<QuizConfig>({
   academicLevel: {
     type: String,
-    enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc'],
+    enum: [
+      'class-1',
+      'class-2',
+      'class-3',
+      'class-4',
+      'class-5',
+      'class-6',
+      'class-7',
+      'jsc',
+      'ssc',
+      'hsc',
+      'bsc',
+      'msc',
+    ],
     required: true,
   },
   subject: {
@@ -76,7 +90,6 @@ const quizConfigSchema = new Schema<QuizConfig>({
   },
   topic: {
     type: String,
-    required: true,
     trim: true,
   },
   language: {
@@ -129,13 +142,25 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     },
     topic: {
       type: String,
-      required: true,
       trim: true,
       index: true,
     },
     academicLevel: {
       type: String,
-      enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc'],
+      enum: [
+        'class-1',
+        'class-2',
+        'class-3',
+        'class-4',
+        'class-5',
+        'class-6',
+        'class-7',
+        'jsc',
+        'ssc',
+        'hsc',
+        'bsc',
+        'msc',
+      ],
       required: true,
       index: true,
     },
@@ -155,11 +180,11 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       type: [questionSchema],
       required: true,
       validate: {
-        validator: function(questions: Question[]) {
+        validator: function (questions: Question[]) {
           return questions.length > 0;
         },
-        message: 'Quiz must have at least one question'
-      }
+        message: 'Quiz must have at least one question',
+      },
     },
     timeLimit: {
       type: Number,
@@ -229,16 +254,31 @@ quizSchema.index({ tags: 1 });
 quizSchema.index({ createdAt: -1 });
 quizSchema.index({ attempts: -1 });
 quizSchema.index({ averageScore: -1 });
-quizSchema.index({ 
-  title: 'text', 
-  description: 'text', 
-  subject: 'text', 
-  topic: 'text',
-  tags: 'text'
-});
+
+// quizSchema.index({
+//   title: 'text',
+//   description: 'text',
+//   subject: 'text',
+//   topic: 'text',
+//   tags: 'text',
+// });
+
+quizSchema.index(
+  {
+    title: 'text',
+    description: 'text',
+    subject: 'text',
+    topic: 'text',
+    tags: 'text',
+  },
+  {
+    default_language: 'none',
+    language_override: 'none',
+  }
+);
 
 // Virtual for question count
-quizSchema.virtual('questionCount').get(function() {
+quizSchema.virtual('questionCount').get(function () {
   return this.questions?.length || 0;
 });
 
@@ -246,7 +286,7 @@ quizSchema.virtual('questionCount').get(function() {
 quizSchema.plugin(paginate);
 
 // Pre-save middleware to calculate total points and estimated time
-quizSchema.pre('save', function(next) {
+quizSchema.pre('save', function (next) {
   if (this.questions && this.questions.length > 0) {
     // Calculate total points
     this.totalPoints = this.questions.reduce((total, question) => {
@@ -262,52 +302,54 @@ quizSchema.pre('save', function(next) {
 });
 
 // Static methods
-quizSchema.statics.isExistQuizById = async function(id: string) {
+quizSchema.statics.isExistQuizById = async function (id: string) {
   return await this.findById(id).lean();
 };
 
-quizSchema.statics.getQuizzesByUser = async function(userId: string) {
+quizSchema.statics.getQuizzesByUser = async function (userId: string) {
   return await this.find({ createdBy: userId }).sort({ createdAt: -1 });
 };
 
-quizSchema.statics.getPublicQuizzes = async function() {
-  return await this.find({ isPublic: true, status: 'published' }).sort({ createdAt: -1 });
+quizSchema.statics.getPublicQuizzes = async function () {
+  return await this.find({ isPublic: true, status: 'published' }).sort({
+    createdAt: -1,
+  });
 };
 
-quizSchema.statics.searchQuizzes = async function(filters: QuizSearchFilters) {
+quizSchema.statics.searchQuizzes = async function (filters: QuizSearchFilters) {
   const query: any = { status: 'published', isPublic: true };
-  
+
   if (filters.academicLevel && filters.academicLevel.length > 0) {
     query.academicLevel = { $in: filters.academicLevel };
   }
-  
+
   if (filters.subject && filters.subject.length > 0) {
     query.subject = { $in: filters.subject };
   }
-  
+
   if (filters.difficulty && filters.difficulty.length > 0) {
     query.difficulty = { $in: filters.difficulty };
   }
-  
+
   if (filters.questionType && filters.questionType.length > 0) {
     query['questions.type'] = { $in: filters.questionType };
   }
-  
+
   if (filters.language && filters.language.length > 0) {
     query.language = { $in: filters.language };
   }
-  
+
   if (filters.tags && filters.tags.length > 0) {
     query.tags = { $in: filters.tags };
   }
-  
+
   if (filters.dateRange) {
     query.createdAt = {
       ...(filters.dateRange.from && { $gte: new Date(filters.dateRange.from) }),
       ...(filters.dateRange.to && { $lte: new Date(filters.dateRange.to) }),
     };
   }
-  
+
   return await this.find(query).sort({ createdAt: -1 });
 };
 

@@ -26,12 +26,13 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 ): Promise<IQuiz> => {
   try {
     const generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
+    console.log("Generated questions:", generatedQuestions);
 
     const quizData: ICreateQuizRequest = {
       title: `${request.subject} - ${request.topic} Quiz`,
-      description: `A ${request.difficulty} level quiz on ${request.topic} for ${request.academicLevel}`,
+      description: `A ${request.difficulty} level quiz on ${request?.topic} for ${request.academicLevel}`,
       subject: request.subject,
-      topic: request.topic,
+      topic: request?.topic,
       academicLevel: request.academicLevel,
       difficulty: request.difficulty,
       language: request.language,
@@ -39,11 +40,12 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
       timeLimit: request.timeLimit,
       instructions: request.instructions,
       isPublic: false,
-      tags: [request.subject, request.topic, request.academicLevel],
+      tags: [request.subject, request?.topic, request.academicLevel],
     };
 
     return await createQuiz(quizData, userId);
   } catch (error) {
+    console.log("Error generating quiz:", error);
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to generate quiz');
   }
 };
@@ -63,13 +65,13 @@ const determineQuestionType = (questions: any[]): any => {
     config: {
       academicLevel: quizData.academicLevel,
       subject: quizData.subject,
-      topic: quizData.topic,
+      topic: quizData?.topic,
       language: quizData.language,
       questionType: determineQuestionType(quizData.questions),
       difficulty: quizData.difficulty,
       questionCount: quizData.questions.length,
-      timeLimit: quizData.timeLimit,
-      instructions: quizData.instructions,
+      timeLimit: quizData?.timeLimit,
+      instructions: quizData?.instructions,
     },
   });
 

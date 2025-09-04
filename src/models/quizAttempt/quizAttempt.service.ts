@@ -1,22 +1,23 @@
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
-import { QuizAttempt } from './quizAttempt.model';
-import { Quiz } from '../quiz/quiz.model';
-import {
-  IQuizAttempt,
-  IQuizResult,
-  IStartQuizAttemptRequest,
-  ISubmitAnswerRequest,
-  ISaveAnswerRequest,
-  ICompleteQuizAttemptRequest,
-  IQuizStats,
-} from './quizAttempt.interface';
 import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
+import { IQuiz } from '../quiz/quiz.interface';
+import { Quiz } from '../quiz/quiz.model';
+import {
+  ICompleteQuizAttemptRequest,
+  IQuizAttemptDocument,
+  IQuizResult,
+  IQuizStats,
+  ISaveAnswerRequest,
+  IStartQuizAttemptRequest,
+  ISubmitAnswerRequest
+} from './quizAttempt.interface';
+import { QuizAttempt } from './quizAttempt.model';
 const startQuizAttempt = async (
   request: IStartQuizAttemptRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const quiz = await Quiz.findById(request.quizId);
 
   if (!quiz) {
@@ -68,7 +69,7 @@ const startQuizAttempt = async (
 const submitAnswer = async (
   request: ISubmitAnswerRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(request.attemptId);
 
   if (!attempt) {
@@ -106,7 +107,7 @@ const submitAnswer = async (
 const saveAnswers = async (
   request: ISaveAnswerRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(request.attemptId);
 
   if (!attempt) {
@@ -139,7 +140,7 @@ const flagQuestion = async (
   questionId: string,
   flagged: boolean,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(attemptId);
 
   if (!attempt) {
@@ -207,7 +208,7 @@ const completeQuizAttempt = async (
   attempt.completedAt = new Date();
 
   // Calculate score
-  await attempt.calculateScore(quiz);
+  // await attempt.calculateQuizScore(quiz);
 
   // Update quiz statistics
   await updateQuizStats(quiz._id, attempt.score!, quiz.totalPoints!);
@@ -217,7 +218,7 @@ const completeQuizAttempt = async (
 const getQuizAttemptById = async (
   attemptId: string,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(attemptId)
     .populate('quizId', 'title subject topic difficulty timeLimit')
     .populate('userId', 'profile.fullName email');
@@ -242,7 +243,7 @@ const getUserAttempts = async (
     quizId?: string;
     status?: 'in-progress' | 'completed' | 'abandoned';
   }
-): Promise<IPaginateResult<IQuizAttempt>> => {
+): Promise<IPaginateResult<IQuizAttemptDocument>> => {
   const query: any = { userId };
 
   if (filters?.quizId) {
@@ -260,19 +261,23 @@ const getUserAttempts = async (
   ];
   options.sortBy = options.sortBy || 'createdAt';
 
-  return await QuizAttempt.paginate(query, options);
+  return (await QuizAttempt.paginate(query, options)) as IPaginateResult<
+    IQuizAttemptDocument
+  >;
 };
 const getQuizAttempts = async (
   quizId: string,
   options: IPaginateOptions
-): Promise<IPaginateResult<IQuizAttempt>> => {
+): Promise<IPaginateResult<IQuizAttemptDocument>> => {
   const query = { quizId, status: 'completed' };
   options.populate = [
     { path: 'userId', select: 'profile.fullName email' },
     { path: 'quizId', select: 'title subject topic' },
   ];
   options.sortBy = options.sortBy || 'createdAt';
-  return await QuizAttempt.paginate(query, options);
+  return (await QuizAttempt.paginate(query, options)) as IPaginateResult<
+    IQuizAttemptDocument
+  >;
 };
 const getQuizResult = async (
   attemptId: string,
@@ -370,7 +375,7 @@ const getLeaderboard = async (
 const abandonAttempt = async (
   attemptId: string,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(attemptId);
 
   if (!attempt) {
@@ -456,7 +461,7 @@ const updateQuizStats = async (
   });
 };
 
-const generateQuizResult = (attempt: IQuizAttempt, quiz: any): IQuizResult => {
+const generateQuizResult = (attempt: IQuizAttemptDocument, quiz: IQuiz): IQuizResult => {
   const detailedResults = quiz.questions.map((question: any) => {
     const userAnswer = attempt.answers.get(question.id);
     let isCorrect = false;
@@ -490,7 +495,9 @@ const generateQuizResult = (attempt: IQuizAttempt, quiz: any): IQuizResult => {
 
   const percentage = Math.round((attempt.score! / attempt.totalScore!) * 100);
   const timeSpent = attempt.timeSpent || 0;
-  const averageTimePerQuestion = timeSpent / quiz.questions.length;
+  const questions = quiz.questions;
+  const numQuestions = questions.length;
+  const averageTimePerQuestion = Number(timeSpent) / numQuestions;
 
   let grade = 'F';
   if (percentage >= 90) grade = 'A+';
@@ -522,7 +529,7 @@ const generateQuizResult = (attempt: IQuizAttempt, quiz: any): IQuizResult => {
 
 const generateRecommendations = (
   detailedResults: any[],
-  quiz: any,
+  quiz: IQuiz,
   percentage: number
 ): string[] => {
   const recommendations = [];
@@ -554,7 +561,9 @@ const generateRecommendations = (
       const difficulty = quiz.questions.find(
         (qq: any) => qq.id === q.questionId
       )?.difficulty;
-      acc[difficulty] = (acc[difficulty] || 0) + 1;
+      if (difficulty) {
+        acc[difficulty] = (acc[difficulty] || 0) + 1;
+      }
       return acc;
     }, {});
 

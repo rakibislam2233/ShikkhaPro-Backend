@@ -8,13 +8,15 @@ import {
   QuizLanguage,
   IGenerateQuizRequest,
 } from '../models/quiz/quiz.interface';
+import AppError from '../errors/AppErro';
+import { StatusCodes } from 'http-status-codes';
 
 let openaiClient: OpenAI | null = null;
 
 const initializeOpenAI = (): OpenAI => {
   if (!openaiClient) {
     if (!config.openai?.apiKey) {
-      throw new Error('OpenAI API key is required');
+      throw new AppError(StatusCodes.BAD_REQUEST,'OpenAI API key is required');
     }
 
     openaiClient = new OpenAI({
@@ -172,9 +174,8 @@ const openAIGenerateQuiz = async (
   try {
     const openai = initializeOpenAI();
     const prompt = buildPrompt(request);
-
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -190,16 +191,17 @@ const openAIGenerateQuiz = async (
       response_format: { type: 'json_object' },
     });
 
+    console.log('Completion: ', completion.choices[0]?.message);
     const responseContent = completion.choices[0]?.message?.content;
     if (!responseContent) {
-      throw new Error('No response from OpenAI');
+      throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'No response from OpenAI');
     }
 
     const generatedData = JSON.parse(responseContent);
     return formatQuestions(generatedData.questions, request);
   } catch (error) {
     console.error('Error generating quiz with OpenAI:', error);
-    throw new Error('Failed to generate quiz questions');
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'Failed to generate quiz questions');
   }
 };
 
@@ -240,7 +242,7 @@ Feedback: ${feedback}
 Please provide an improved version of the question maintaining the same structure and format.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -258,7 +260,7 @@ Please provide an improved version of the question maintaining the same structur
 
     const responseContent = completion.choices[0]?.message?.content;
     if (!responseContent) {
-      throw new Error('No response from OpenAI');
+      throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'No response from OpenAI');
     }
 
     const improvedData = JSON.parse(responseContent);
@@ -269,7 +271,7 @@ Please provide an improved version of the question maintaining the same structur
     };
   } catch (error) {
     console.error('Error improving question with OpenAI:', error);
-    throw new Error('Failed to improve question');
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'Failed to improve question');
   }
 };
 

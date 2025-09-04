@@ -6,7 +6,7 @@ import pick from '../../shared/pick';
 import { StatusCodes } from 'http-status-codes';
 
 const generateQuiz = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const { userId } = req.user;
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,

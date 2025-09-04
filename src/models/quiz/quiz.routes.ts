@@ -1,18 +1,18 @@
 import express from 'express';
-import { QuizController } from './quiz.controller';
-import validateRequest from '../../shared/validateRequest';
 import auth from '../../middlewares/auth';
+import validateRequest from '../../shared/validateRequest';
+import { QuizController } from './quiz.controller';
 import {
-  generateQuizValidation,
+  completeQuizAttemptValidation,
   createQuizValidation,
-  updateQuizValidation,
-  getQuizValidation,
   deleteQuizValidation,
+  generateQuizValidation,
+  getQuizValidation,
+  saveAnswersValidation,
   searchQuizzesValidation,
   startQuizAttemptValidation,
   submitAnswerValidation,
-  saveAnswersValidation,
-  completeQuizAttemptValidation,
+  updateQuizValidation,
 } from './quiz.validation';
 
 const router = express.Router();
@@ -20,28 +20,21 @@ const router = express.Router();
 // Quiz generation and management
 router.post(
   '/generate',
-  auth(),
+  auth('User'),
   validateRequest(generateQuizValidation),
   QuizController.generateQuiz
 );
 
 router.post(
   '/',
-  auth(),
+  auth("User"),
   validateRequest(createQuizValidation),
   QuizController.createQuiz
 );
 
-router.get(
-  '/my-quizzes',
-  auth(),
-  QuizController.getUserQuizzes
-);
+router.get('/my-quizzes', auth("User"), QuizController.getUserQuizzes);
 
-router.get(
-  '/public',
-  QuizController.getPublicQuizzes
-);
+router.get('/public', QuizController.getPublicQuizzes);
 
 router.get(
   '/search',
@@ -57,14 +50,14 @@ router.get(
 
 router.patch(
   '/:id',
-  auth(),
+  auth("User"),
   validateRequest(updateQuizValidation),
   QuizController.updateQuiz
 );
 
 router.delete(
   '/:id',
-  auth(),
+  auth("User"),
   validateRequest(deleteQuizValidation),
   QuizController.deleteQuiz
 );
@@ -72,48 +65,37 @@ router.delete(
 // Quiz attempt management
 router.post(
   '/attempt/start',
-  auth(),
+  auth("User"),
   validateRequest(startQuizAttemptValidation),
   QuizController.startQuizAttempt
 );
 
 router.post(
   '/attempt/answer',
-  auth(),
+  auth("User"),
   validateRequest(submitAnswerValidation),
   QuizController.submitAnswer
 );
 
 router.post(
   '/attempt/save',
-  auth(),
+  auth("User"),
   validateRequest(saveAnswersValidation),
   QuizController.saveAnswers
 );
 
 router.post(
   '/attempt/complete',
-  auth(),
+  auth("User"),
   validateRequest(completeQuizAttemptValidation),
   QuizController.completeQuizAttempt
 );
 
-router.get(
-  '/result/:attemptId',
-  auth(),
-  QuizController.getQuizResult
-);
+router.get('/result/:attemptId', auth("User"), QuizController.getQuizResult);
 
 // Statistics and leaderboard
-router.get(
-  '/stats/user',
-  auth(),
-  QuizController.getUserStats
-);
+router.get('/stats/user', auth("User"), QuizController.getUserStats);
 
-router.get(
-  '/stats/leaderboard',
-  QuizController.getLeaderboard
-);
+router.get('/stats/leaderboard', QuizController.getLeaderboard);
 
 export default router;

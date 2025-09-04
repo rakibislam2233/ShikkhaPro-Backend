@@ -25,7 +25,7 @@ export const generateQuizValidation = z.object({
   body: z.object({
     academicLevel: academicLevelSchema,
     subject: z.string().min(2, 'Subject must be at least 2 characters').max(100),
-    topic: z.string().min(2, 'Topic must be at least 2 characters').max(100),
+    topic: z.string().min(2, 'Topic must be at least 2 characters').max(100).optional(),
     language: languageSchema,
     questionType: questionTypeSchema,
     difficulty: difficultySchema,

@@ -1,14 +1,14 @@
 import express from 'express';
-import { QuestionController } from './question.controller';
-import validateRequest from '../../shared/validateRequest';
 import auth from '../../middlewares/auth';
+import validateRequest from '../../shared/validateRequest';
+import { QuestionController } from './question.controller';
 import {
-  createQuestionValidation,
-  updateQuestionValidation,
-  getQuestionValidation,
-  deleteQuestionValidation,
-  searchQuestionsValidation,
   approveQuestionValidation,
+  createQuestionValidation,
+  deleteQuestionValidation,
+  getQuestionValidation,
+  searchQuestionsValidation,
+  updateQuestionValidation,
 } from './question.validation';
 
 const router = express.Router();
@@ -16,21 +16,21 @@ const router = express.Router();
 // Question generation
 router.post(
   '/generate',
-  auth(),
+  auth("User"),
   QuestionController.generateQuestion
 );
 
 // Question management
 router.post(
   '/',
-  auth(),
+  auth("User"),
   validateRequest(createQuestionValidation),
   QuestionController.createQuestion
 );
 
 router.get(
   '/my-questions',
-  auth(),
+  auth("User"),
   QuestionController.getUserQuestions
 );
 
@@ -68,14 +68,14 @@ router.get(
 
 router.patch(
   '/:id',
-  auth(),
+  auth("User"),
   validateRequest(updateQuestionValidation),
   QuestionController.updateQuestion
 );
 
 router.delete(
   '/:id',
-  auth(),
+  auth("User"),
   validateRequest(deleteQuestionValidation),
   QuestionController.deleteQuestion
 );
@@ -83,14 +83,14 @@ router.delete(
 // Question improvement
 router.post(
   '/:id/improve',
-  auth(),
+  auth("User"),
   QuestionController.improveQuestion
 );
 
 // Admin only - Question approval
 router.patch(
   '/:id/approve',
-  auth(),
+  auth("User"),
   validateRequest(approveQuestionValidation),
   QuestionController.approveQuestion
 );
