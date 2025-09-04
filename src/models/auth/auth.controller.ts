@@ -27,7 +27,7 @@ const validateUserStatus = (user: IUser) => {
 };
 
 const register = catchAsync(async (req, res) => {
-  if (req.body?.role === 'admin' || req.body?.role === 'super_admin') {
+  if (req.body?.role === 'Admin' || req.body?.role === 'SuperAdmin') {
     throw new AppError(
       StatusCodes.UNAUTHORIZED,
       'Unauthorized to create admin or super admin.'

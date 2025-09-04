@@ -4,7 +4,6 @@ import { authValidations } from './auth.validations';
 import validateRequest from '../../shared/validateRequest';
 import auth from '../../middlewares/auth';
 
-
 const router = Router();
 
 // Registration route

@@ -7,6 +7,7 @@ import {
   ISocialAccount,
   IUser,
   IUserModel,
+  UserRoles,
   UserStatus,
 } from './user.interface';
 import bcrypt from 'bcrypt';
@@ -75,8 +76,8 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
     role: {
       type: String,
-      enum: ['User', 'Admin', 'Super_Admin'],
-      default: 'User',
+      enum: UserRoles,
+      default: UserRoles.User,
       index: true,
     },
     status: {

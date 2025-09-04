@@ -21,11 +21,16 @@ async function main() {
       socketTimeoutMS: 45000,
       family: 4,
     });
+
+    console.log('🚀 Database connected successfully');
     logger.info(colors.green('🚀 Database connected successfully'));
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);
     server = app.listen(port, config.backend.ip as string, () => {
+      console.log(
+        `♻️  Application listening on port ${config.backend.baseUrl}/test`
+      );
       logger.info(
         colors.yellow(
           `♻️  Application listening on port ${config.backend.baseUrl}/test`

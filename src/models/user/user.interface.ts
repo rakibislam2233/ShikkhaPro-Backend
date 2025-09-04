@@ -47,7 +47,7 @@ export interface IUser {
   _id: mongoose.Types.ObjectId;
   email: string;
   password: string;
-  role: 'User' | 'Admin' | 'Super_Admin';
+  role: UserRoles;
   status: UserStatus;
   isResetPassword: boolean;
   banReason?: string;
@@ -66,6 +66,12 @@ export enum UserStatus {
   Delete = 'Delete',
   Blocked = 'Blocked',
   Banned = 'Banned',
+}
+
+export enum UserRoles {
+  User = 'User',
+  Admin = 'Admin',
+  Super_Admin = 'Super_Admin',
 }
 export interface IUserModel extends Model<IUser> {
   paginate: (
