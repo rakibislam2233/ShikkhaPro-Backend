@@ -1,5 +1,5 @@
 import { Model, Types } from 'mongoose';
-import { PaginateOptions, PaginateResult } from '../../types/paginate';
+import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
 export interface INotification {
   _id?: Types.ObjectId;
@@ -26,6 +26,6 @@ export interface INotification {
 export interface INotificationModal extends Model<INotification> {
   paginate: (
     query: Record<string, any>,
-    options: PaginateOptions
-  ) => Promise<PaginateResult<INotification>>;
+    options: IPaginateOptions
+  ) => Promise<IPaginateResult<INotification>>;
 }

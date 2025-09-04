@@ -1,4 +1,4 @@
-import { Request, } from 'express';
+import { Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../shared/catchAsync';
 import sendResponse from '../../shared/sendResponse';
@@ -152,7 +152,7 @@ const searchQuestions = catchAsync(async (req: Request, res) => {
     filters.tags = filters.tags.split(',');
   }
   if (filters.isApproved && typeof filters.isApproved === 'string') {
-    filters.isApproved = filters.isApproved === 'true';
+    (filters.isApproved as boolean) = filters.isApproved === 'true';
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);

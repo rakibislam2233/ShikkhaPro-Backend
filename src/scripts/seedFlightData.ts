@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from '../config';
-import { seedFlightData } from '../seeders/flightDataSeeder';
+
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -19,8 +19,6 @@ const main = async () => {
     console.log('🚀 Starting flight data seeding script...');
     
     await connectDB();
-    await seedFlightData();
-    
     console.log('🎉 Flight data seeding completed successfully!');
     process.exit(0);
   } catch (error: any) {
