@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../shared/catchAsync';
-import { quizService } from './quiz.service';
+import { QuizServices } from './quiz.service';
 import sendResponse from '../../shared/sendResponse';
-import { IUser } from '../user/user.interface';
 import pick from '../../shared/pick';
 import { StatusCodes } from 'http-status-codes';
 
@@ -15,7 +14,7 @@ const generateQuiz = catchAsync(async (req, res) => {
     });
   }
 
-  const quiz = await quizService.generateQuiz(req.body, userId);
+  const quiz = await QuizServices.generateQuiz(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.CREATED,
@@ -33,7 +32,7 @@ const createQuiz = catchAsync(async (req, res) => {
     });
   }
 
-  const quiz = await quizService.createQuiz(req.body, userId);
+  const quiz = await QuizServices.createQuiz(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.CREATED,
@@ -46,7 +45,7 @@ const getQuizById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
 
-  const quiz = await quizService.getQuizById(id, userId);
+  const quiz = await QuizServices.getQuizById(id, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -66,7 +65,7 @@ const updateQuiz = catchAsync(async (req, res) => {
     });
   }
 
-  const quiz = await quizService.updateQuiz(id, req.body, userId);
+  const quiz = await QuizServices.updateQuiz(id, req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -86,7 +85,7 @@ const deleteQuiz = catchAsync(async (req, res) => {
     });
   }
 
-  await quizService.deleteQuiz(id, userId);
+  await QuizServices.deleteQuiz(id, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -105,7 +104,7 @@ const getUserQuizzes = catchAsync(async (req, res) => {
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await quizService.getUserQuizzes(userId, options);
+  const result = await QuizServices.getUserQuizzes(userId, options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -116,7 +115,7 @@ const getUserQuizzes = catchAsync(async (req, res) => {
 
 const getPublicQuizzes = catchAsync(async (req: Request, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await quizService.getPublicQuizzes(options);
+  const result = await QuizServices.getPublicQuizzes(options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -157,7 +156,7 @@ const searchQuizzes = catchAsync(async (req: Request, res) => {
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await quizService.searchQuizzes(filters, options);
+  const result = await QuizServices.searchQuizzes(filters, options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -176,7 +175,7 @@ const startQuizAttempt = catchAsync(async (req, res) => {
     });
   }
 
-  const attempt = await quizService.startQuizAttempt(req.body, userId);
+  const attempt = await QuizServices.startQuizAttempt(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.CREATED,
@@ -195,7 +194,7 @@ const submitAnswer = catchAsync(async (req, res) => {
     });
   }
 
-  const attempt = await quizService.submitAnswer(req.body, userId);
+  const attempt = await QuizServices.submitAnswer(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -214,7 +213,7 @@ const saveAnswers = catchAsync(async (req, res) => {
     });
   }
 
-  const attempt = await quizService.saveAnswers(req.body, userId);
+  const attempt = await QuizServices.saveAnswers(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -233,7 +232,7 @@ const completeQuizAttempt = catchAsync(async (req, res) => {
     });
   }
 
-  const result = await quizService.completeQuizAttempt(req.body, userId);
+  const result = await QuizServices.completeQuizAttempt(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -253,7 +252,7 @@ const getQuizResult = catchAsync(async (req, res) => {
     });
   }
 
-  const result = await quizService.getQuizResult(attemptId, userId);
+  const result = await QuizServices.getQuizResult(attemptId, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -272,7 +271,7 @@ const getUserStats = catchAsync(async (req, res) => {
     });
   }
 
-  const stats = await quizService.getUserStats(userId);
+  const stats = await QuizServices.getUserStats(userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -285,7 +284,7 @@ const getLeaderboard = catchAsync(async (req: Request, res) => {
   const { quizId } = req.query;
   const limit = parseInt(req.query.limit as string) || 10;
 
-  const leaderboard = await quizService.getLeaderboard(
+  const leaderboard = await QuizServices.getLeaderboard(
     (quizId as string) || undefined,
     limit
   );

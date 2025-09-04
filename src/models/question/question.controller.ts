@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../shared/catchAsync';
-import { questionService } from './question.service';
 import sendResponse from '../../shared/sendResponse';
-import { IUser, UserRoles } from '../user/user.interface';
+import { UserRoles } from '../user/user.interface';
 import pick from '../../shared/pick';
+import { QuestionServices } from './question.service';
 
 const createQuestion = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
@@ -15,7 +15,7 @@ const createQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  const question = await questionService.createQuestion(req.body, userId);
+  const question = await QuestionServices.createQuestion(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.CREATED,
@@ -26,7 +26,7 @@ const createQuestion = catchAsync(async (req, res) => {
 
 const getQuestionById = catchAsync(async (req: Request, res) => {
   const { id } = req.params;
-  const question = await questionService.getQuestionById(id);
+  const question = await QuestionServices.getQuestionById(id);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -38,8 +38,10 @@ const getQuestionById = catchAsync(async (req: Request, res) => {
 const updateQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
-  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
-  
+  const isAdmin =
+    req.user?.role === UserRoles.Admin ||
+    req.user?.role === UserRoles.Super_Admin;
+
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -47,7 +49,12 @@ const updateQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  const question = await questionService.updateQuestion(id, req.body, userId, isAdmin);
+  const question = await QuestionServices.updateQuestion(
+    id,
+    req.body,
+    userId,
+    isAdmin
+  );
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -59,8 +66,10 @@ const updateQuestion = catchAsync(async (req, res) => {
 const deleteQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
-  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
-  
+  const isAdmin =
+    req.user?.role === UserRoles.Admin ||
+    req.user?.role === UserRoles.Super_Admin;
+
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -68,7 +77,7 @@ const deleteQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  await questionService.deleteQuestion(id, userId, isAdmin);
+  await QuestionServices.deleteQuestion(id, userId, isAdmin);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -78,7 +87,7 @@ const deleteQuestion = catchAsync(async (req, res) => {
 
 const getUserQuestions = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
-  
+
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -87,7 +96,7 @@ const getUserQuestions = catchAsync(async (req, res) => {
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await questionService.getUserQuestions(userId, options);
+  const result = await QuestionServices.getUserQuestions(userId, options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -98,7 +107,7 @@ const getUserQuestions = catchAsync(async (req, res) => {
 
 const getApprovedQuestions = catchAsync(async (req: Request, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await questionService.getApprovedQuestions(options);
+  const result = await QuestionServices.getApprovedQuestions(options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -109,10 +118,17 @@ const getApprovedQuestions = catchAsync(async (req: Request, res) => {
 
 const searchQuestions = catchAsync(async (req: Request, res) => {
   const filters = pick(req.query, [
-    'subject', 'topic', 'academicLevel', 'difficulty', 'questionType', 
-    'language', 'tags', 'isApproved', 'dateRange'
+    'subject',
+    'topic',
+    'academicLevel',
+    'difficulty',
+    'questionType',
+    'language',
+    'tags',
+    'isApproved',
+    'dateRange',
   ]);
-  
+
   // Parse array filters
   if (filters.subject && typeof filters.subject === 'string') {
     filters.subject = filters.subject.split(',');
@@ -140,7 +156,7 @@ const searchQuestions = catchAsync(async (req: Request, res) => {
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await questionService.searchQuestions(filters, options);
+  const result = await QuestionServices.searchQuestions(filters, options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -152,9 +168,11 @@ const searchQuestions = catchAsync(async (req: Request, res) => {
 const approveQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { isApproved } = req.body;
-  
+
   // Only admins can approve questions
-  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
+  const isAdmin =
+    req.user?.role === UserRoles.Admin ||
+    req.user?.role === UserRoles.Super_Admin;
   if (!isAdmin) {
     return sendResponse(res, {
       code: StatusCodes.FORBIDDEN,
@@ -162,7 +180,7 @@ const approveQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  const question = await questionService.approveQuestion(id, isApproved);
+  const question = await QuestionServices.approveQuestion(id, isApproved);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -173,7 +191,7 @@ const approveQuestion = catchAsync(async (req, res) => {
 
 const generateQuestion = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
-  
+
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -181,10 +199,17 @@ const generateQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  const { subject, topic, academicLevel, difficulty, questionType, language } = req.body;
-  
-  const question = await questionService.generateQuestion(
-    subject, topic, academicLevel, difficulty, questionType, language || 'english', userId
+  const { subject, topic, academicLevel, difficulty, questionType, language } =
+    req.body;
+
+  const question = await QuestionServices.generateQuestion(
+    subject,
+    topic,
+    academicLevel,
+    difficulty,
+    questionType,
+    language || 'english',
+    userId
   );
 
   sendResponse(res, {
@@ -198,7 +223,7 @@ const improveQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { feedback } = req.body;
   const userId = req.user?._id?.toString();
-  
+
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -206,7 +231,7 @@ const improveQuestion = catchAsync(async (req, res) => {
     });
   }
 
-  const question = await questionService.improveQuestion(id, feedback, userId);
+  const question = await QuestionServices.improveQuestion(id, feedback, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -217,7 +242,7 @@ const improveQuestion = catchAsync(async (req, res) => {
 
 const getQuestionsBySubject = catchAsync(async (req: Request, res) => {
   const { subject } = req.params;
-  const questions = await questionService.getQuestionsBySubject(subject);
+  const questions = await QuestionServices.getQuestionsBySubject(subject);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -228,7 +253,7 @@ const getQuestionsBySubject = catchAsync(async (req: Request, res) => {
 
 const getQuestionsByTopic = catchAsync(async (req: Request, res) => {
   const { topic } = req.params;
-  const questions = await questionService.getQuestionsByTopic(topic);
+  const questions = await QuestionServices.getQuestionsByTopic(topic);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -238,7 +263,7 @@ const getQuestionsByTopic = catchAsync(async (req: Request, res) => {
 });
 
 const getQuestionStats = catchAsync(async (req: Request, res) => {
-  const stats = await questionService.getQuestionStats();
+  const stats = await QuestionServices.getQuestionStats();
 
   sendResponse(res, {
     code: StatusCodes.OK,
