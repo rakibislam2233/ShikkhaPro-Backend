@@ -13,8 +13,7 @@ import {
 } from './quizAttempt.interface';
 import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
-
-export const startQuizAttempt = async (
+const startQuizAttempt = async (
   request: IStartQuizAttemptRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -66,8 +65,7 @@ export const startQuizAttempt = async (
 
   return await attempt.save();
 };
-
-export const submitAnswer = async (
+const submitAnswer = async (
   request: ISubmitAnswerRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -105,8 +103,7 @@ export const submitAnswer = async (
   attempt.answers.set(request.questionId, request.answer);
   return await attempt.save();
 };
-
-export const saveAnswers = async (
+const saveAnswers = async (
   request: ISaveAnswerRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -137,8 +134,7 @@ export const saveAnswers = async (
 
   return await attempt.save();
 };
-
-export const flagQuestion = async (
+const flagQuestion = async (
   attemptId: string,
   questionId: string,
   flagged: boolean,
@@ -176,8 +172,7 @@ export const flagQuestion = async (
 
   return await attempt.save();
 };
-
-export const completeQuizAttempt = async (
+const completeQuizAttempt = async (
   request: ICompleteQuizAttemptRequest,
   userId: string
 ): Promise<IQuizResult> => {
@@ -219,8 +214,7 @@ export const completeQuizAttempt = async (
 
   return generateQuizResult(attempt, quiz);
 };
-
-export const getQuizAttemptById = async (
+const getQuizAttemptById = async (
   attemptId: string,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -241,8 +235,7 @@ export const getQuizAttemptById = async (
 
   return attempt;
 };
-
-export const getUserAttempts = async (
+const getUserAttempts = async (
   userId: string,
   options: IPaginateOptions,
   filters?: {
@@ -269,8 +262,7 @@ export const getUserAttempts = async (
 
   return await QuizAttempt.paginate(query, options);
 };
-
-export const getQuizAttempts = async (
+const getQuizAttempts = async (
   quizId: string,
   options: IPaginateOptions
 ): Promise<IPaginateResult<IQuizAttempt>> => {
@@ -282,8 +274,10 @@ export const getQuizAttempts = async (
   options.sortBy = options.sortBy || 'createdAt';
   return await QuizAttempt.paginate(query, options);
 };
-
-export const getQuizResult = async (attemptId: string, userId: string): Promise<IQuizResult> => {
+const getQuizResult = async (
+  attemptId: string,
+  userId: string
+): Promise<IQuizResult> => {
   const attempt = await QuizAttempt.findById(attemptId);
 
   if (!attempt) {
@@ -312,7 +306,7 @@ export const getQuizResult = async (attemptId: string, userId: string): Promise<
   return generateQuizResult(attempt, quiz);
 };
 
-export const getUserStats = async (
+const getUserStats = async (
   userId: string,
   filters?: { timeframe?: string; subject?: string; academicLevel?: string }
 ): Promise<IQuizStats> => {
@@ -361,7 +355,7 @@ export const getUserStats = async (
   return baseStats;
 };
 
-export const getLeaderboard = async (
+const getLeaderboard = async (
   quizId?: string,
   limit: number = 10,
   filters?: {
@@ -373,7 +367,7 @@ export const getLeaderboard = async (
   return await QuizAttempt.getLeaderboard(quizId, limit);
 };
 
-export const abandonAttempt = async (
+const abandonAttempt = async (
   attemptId: string,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -401,7 +395,10 @@ export const abandonAttempt = async (
   return await attempt.save();
 };
 
-export const getAttemptProgress = async (attemptId: string, userId: string): Promise<any> => {
+const getAttemptProgress = async (
+  attemptId: string,
+  userId: string
+): Promise<any> => {
   const attempt = await QuizAttempt.findById(attemptId);
 
   if (!attempt) {
@@ -468,9 +465,7 @@ const generateQuizResult = (attempt: IQuizAttempt, quiz: any): IQuizResult => {
       const correctAnswers = Array.isArray(question.correctAnswer)
         ? question.correctAnswer
         : [question.correctAnswer];
-      const userAnswers = Array.isArray(userAnswer)
-        ? userAnswer
-        : [userAnswer];
+      const userAnswers = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
 
       isCorrect =
         correctAnswers.length === userAnswers.length &&
@@ -563,8 +558,8 @@ const generateRecommendations = (
       return acc;
     }, {});
 
-    const mostMissedDifficulty = Object.keys(difficultyCounts).reduce(
-      (a, b) => (difficultyCounts[a] > difficultyCounts[b] ? a : b)
+    const mostMissedDifficulty = Object.keys(difficultyCounts).reduce((a, b) =>
+      difficultyCounts[a] > difficultyCounts[b] ? a : b
     );
 
     if (mostMissedDifficulty) {
@@ -575,4 +570,22 @@ const generateRecommendations = (
   }
 
   return recommendations;
+};
+export const QuizAttemptServices = {
+  startQuizAttempt,
+  submitAnswer,
+  saveAnswers,
+  flagQuestion,
+  getUserStats,
+  getQuizAttempts,
+  completeQuizAttempt,
+  getQuizAttemptById,
+  getUserAttempts,
+  getAttemptProgress,
+  getQuizResult,
+  generateQuizResult,
+  generateRecommendations,
+  getLeaderboard,
+  updateQuizStats,
+  abandonAttempt,
 };

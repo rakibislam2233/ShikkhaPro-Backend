@@ -8,10 +8,7 @@ import {
 } from './question.interface';
 import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
-import {
-  generateSingleQuestion as openAIGenerateSingleQuestion,
-  improveQuestion as openAIImproveQuestion,
-} from '../../services/openai.service';
+import { OpenAIService } from '../../services/openai.service';
 
 const createQuestion = async (
   questionData: ICreateQuestionRequest,
@@ -190,7 +187,7 @@ const generateQuestion = async (
   userId: string
 ): Promise<IQuestion> => {
   try {
-    const generatedQuestion = await openAIGenerateSingleQuestion(
+    const generatedQuestion = await OpenAIService.openAIGenerateSingleQuestion(
       subject,
       topic,
       academicLevel,
@@ -240,7 +237,7 @@ const improveQuestion = async (
   }
 
   try {
-    const improvedQuestion = await openAIImproveQuestion(
+    const improvedQuestion = await OpenAIService.openAIImproveQuestion(
       {
         id: question._id.toString(),
         question: question.question,

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../shared/catchAsync';
 import sendResponse from '../../shared/sendResponse';

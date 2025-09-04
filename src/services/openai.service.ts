@@ -16,7 +16,7 @@ const initializeOpenAI = (): OpenAI => {
     if (!config.openai?.apiKey) {
       throw new Error('OpenAI API key is required');
     }
-    
+
     openaiClient = new OpenAI({
       apiKey: config.openai.apiKey,
     });
@@ -84,27 +84,33 @@ Question Count: ${questionCount}`;
   }
 
   if (language === 'bengali') {
-    prompt += '\n\nPlease generate all questions, options, and explanations in Bengali language (বাংলা).';
+    prompt +=
+      '\n\nPlease generate all questions, options, and explanations in Bengali language (বাংলা).';
   } else if (language === 'hindi') {
-    prompt += '\n\nPlease generate all questions, options, and explanations in Hindi language (हिंदी).';
+    prompt +=
+      '\n\nPlease generate all questions, options, and explanations in Hindi language (हिंदी).';
   }
 
   prompt += `\n\nGuidelines for ${difficulty} difficulty:`;
-  
+
   switch (difficulty) {
     case 'easy':
-      prompt += '\n- Focus on basic concepts and direct recall\n- Use simple language and clear questions\n- Test fundamental understanding';
+      prompt +=
+        '\n- Focus on basic concepts and direct recall\n- Use simple language and clear questions\n- Test fundamental understanding';
       break;
     case 'medium':
-      prompt += '\n- Include application of concepts\n- May require some analysis or reasoning\n- Connect different ideas within the topic';
+      prompt +=
+        '\n- Include application of concepts\n- May require some analysis or reasoning\n- Connect different ideas within the topic';
       break;
     case 'hard':
-      prompt += '\n- Require critical thinking and analysis\n- May involve complex scenarios or problem-solving\n- Test deep understanding and application';
+      prompt +=
+        '\n- Require critical thinking and analysis\n- May involve complex scenarios or problem-solving\n- Test deep understanding and application';
       break;
   }
 
   if (questionType === 'mixed') {
-    prompt += '\n\nFor mixed type questions, create a variety including MCQ, short-answer, true-false, and multiple-select questions.';
+    prompt +=
+      '\n\nFor mixed type questions, create a variety including MCQ, short-answer, true-false, and multiple-select questions.';
   }
 
   return prompt;
@@ -119,21 +125,27 @@ const formatAcademicLevel = (level: AcademicLevel): string => {
     'class-5': 'Class 5 (Age 10-11)',
     'class-6': 'Class 6 (Age 11-12)',
     'class-7': 'Class 7 (Age 12-13)',
-    'jsc': 'Junior School Certificate (JSC)',
-    'ssc': 'Secondary School Certificate (SSC)',
-    'hsc': 'Higher Secondary Certificate (HSC)',
-    'bsc': 'Bachelor of Science (BSc)',
-    'msc': 'Master of Science (MSc)',
+    jsc: 'Junior School Certificate (JSC)',
+    ssc: 'Secondary School Certificate (SSC)',
+    hsc: 'Higher Secondary Certificate (HSC)',
+    bsc: 'Bachelor of Science (BSc)',
+    msc: 'Master of Science (MSc)',
   };
 
   return levelMap[level] || level;
 };
 
-const formatQuestions = (questions: any[], request: IGenerateQuizRequest): Question[] => {
+const formatQuestions = (
+  questions: any[],
+  request: IGenerateQuizRequest
+): Question[] => {
   return questions.map((q, index) => ({
     id: `q_${Date.now()}_${index}`,
     question: q.question,
-    type: q.type === 'mixed' ? getRandomQuestionType() : (q.type || request.questionType),
+    type:
+      q.type === 'mixed'
+        ? getRandomQuestionType()
+        : q.type || request.questionType,
     options: q.options,
     correctAnswer: q.correctAnswer,
     explanation: q.explanation,
@@ -145,15 +157,22 @@ const formatQuestions = (questions: any[], request: IGenerateQuizRequest): Quest
 };
 
 const getRandomQuestionType = (): QuestionType => {
-  const types: QuestionType[] = ['mcq', 'short-answer', 'true-false', 'multiple-select'];
+  const types: QuestionType[] = [
+    'mcq',
+    'short-answer',
+    'true-false',
+    'multiple-select',
+  ];
   return types[Math.floor(Math.random() * types.length)];
 };
 
-export const generateQuiz = async (request: IGenerateQuizRequest): Promise<Question[]> => {
+const openAIGenerateQuiz = async (
+  request: IGenerateQuizRequest
+): Promise<Question[]> => {
   try {
     const openai = initializeOpenAI();
     const prompt = buildPrompt(request);
-    
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
@@ -184,7 +203,7 @@ export const generateQuiz = async (request: IGenerateQuizRequest): Promise<Quest
   }
 };
 
-export const generateSingleQuestion = async (
+const openAIGenerateSingleQuestion = async (
   subject: string,
   topic: string,
   academicLevel: AcademicLevel,
@@ -192,7 +211,7 @@ export const generateSingleQuestion = async (
   questionType: QuestionType,
   language: QuizLanguage = 'english'
 ): Promise<Question> => {
-  const questions = await generateQuiz({
+  const questions = await openAIGenerateQuiz({
     academicLevel,
     subject,
     topic,
@@ -205,7 +224,7 @@ export const generateSingleQuestion = async (
   return questions[0];
 };
 
-export const improveQuestion = async (
+const openAIImproveQuestion = async (
   question: Question,
   feedback: string
 ): Promise<Question> => {
@@ -252,4 +271,10 @@ Please provide an improved version of the question maintaining the same structur
     console.error('Error improving question with OpenAI:', error);
     throw new Error('Failed to improve question');
   }
+};
+
+export const OpenAIService = {
+  openAIGenerateQuiz,
+  openAIGenerateSingleQuestion,
+  openAIImproveQuestion,
 };

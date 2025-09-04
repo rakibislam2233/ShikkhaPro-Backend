@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { Quiz } from './quiz.model';
 import { QuizAttempt } from '../quizAttempt/quizAttempt.model';
-import { generateQuiz as openAIGenerateQuiz } from '../../services/openai.service';
+import { OpenAIService } from '../../services/openai.service';
 import {
   IQuiz,
   IGenerateQuizRequest,
@@ -25,7 +25,7 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
   userId: string
 ): Promise<IQuiz> => {
   try {
-    const generatedQuestions = await openAIGenerateQuiz(request);
+    const generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
 
     const quizData: ICreateQuizRequest = {
       title: `${request.subject} - ${request.topic} Quiz`,
