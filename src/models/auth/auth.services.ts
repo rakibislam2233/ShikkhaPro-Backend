@@ -16,13 +16,9 @@ const createUser = async (userData: IUser) => {
   if (existingUser) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'User already exists.');
   }
-
   const user = await User.create(userData);
-  if (user.status === UserStatus.Unverified) {
-    await OtpService.createVerificationEmailOtp(user.email);
-    const tokens = await TokenService.accessAndRefreshToken(user);
-    return tokens;
-  }
+  const tokens = await TokenService.accessAndRefreshToken(user);
+  return tokens;
 };
 
 const verifyOtp = async (email: string, otp: string) => {
@@ -84,8 +80,7 @@ const resetPassword = async (email: string, password: string) => {
     role: user.role,
     email: user.email,
     profile: {
-      firstName: user.profile.firstName,
-      lastName: user.profile.lastName,
+      fullName: user.profile.fullName,
       phone: user.profile.phone,
       address: user.profile.address,
     },

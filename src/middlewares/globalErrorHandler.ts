@@ -14,21 +14,6 @@ import AppError, {
 } from '../errors/AppErro';
 
 const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
-  // Log error with context
-  config.environment === 'development'
-    ? console.log('🚨 globalErrorHandler ~~', {
-        error,
-        method: req.method,
-        url: req.url,
-        userId: req.params.userId,
-      })
-    : errorLogger.error('🚨 globalErrorHandler ~~', {
-        error,
-        method: req.method,
-        url: req.url,
-        userId: req.params.userId,
-      });
-
   let code = 500;
   let message = 'Something went wrong';
   let errorMessages: IErrorMessage[] = [];
@@ -120,11 +105,20 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
       ? errorMessages.map(err => err.message).join(', ')
       : message;
 
+  config.environment === 'development'
+    ? console.log('🚨 globalErrorHandler ~~', {
+        code,
+        message,
+      })
+    : errorLogger.error('🚨 globalErrorHandler ~~', {
+        code,
+        message,
+      });
   // Send response
   res.status(code).json({
     code,
     message,
-    error: errorMessages.length > 0 ? errorMessages : undefined
+    error: errorMessages.length > 0 ? errorMessages : undefined,
   });
 };
 

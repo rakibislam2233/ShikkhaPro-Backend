@@ -37,13 +37,13 @@ const register = catchAsync(async (req, res) => {
   const result = await AuthService.createUser(req.body);
   sendResponse(res, {
     code: StatusCodes.CREATED,
-    message: 'User created successfully. Please verify your email.',
+    message: 'User created successfully',
     data: result,
   });
 });
 
 const login = catchAsync(async (req, res) => {
-  const { email, password, mfaToken } = req.body;
+  const { email, password } = req.body;
   const user = await User.findOne({ email }).select('+password');
   if (!user) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid credentials.');
@@ -127,8 +127,7 @@ const login = catchAsync(async (req, res) => {
 });
 
 const verifyOtp = catchAsync(async (req, res) => {
-  const { email } = req.user;
-  const { otp } = req.body;
+  const { email,otp } = req.body;
   const result = await AuthService.verifyOtp(email, otp);
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -138,7 +137,7 @@ const verifyOtp = catchAsync(async (req, res) => {
 });
 
 const resendOtp = catchAsync(async (req, res) => {
-  const { email } = req.user;
+  const { email } = req.body;
   const result = await AuthService.resendOtp(email);
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -160,7 +159,7 @@ const changePassword = catchAsync(async (req, res) => {
   const { userId } = req.user;
   const { currentPassword, newPassword, mfaToken } = req.body;
 
-  const user = await User.findById(userId).select('+mfaSecret');
+  await User.findById(userId).select('+mfaSecret');
 
   const result = await AuthService.changePassword(
     userId,

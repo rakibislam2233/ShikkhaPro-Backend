@@ -15,7 +15,6 @@ router.post(
 
 router.post(
   '/verify-otp',
-  auth('Common'),
   validateRequest(authValidations.verifyOTP),
   AuthController.verifyOtp
 );
@@ -30,7 +29,6 @@ router.post(
 // Resend verification OTP
 router.post(
   '/resend-otp',
-  auth('Common'),
   AuthController.resendOtp
 );
 
@@ -44,7 +42,6 @@ router.post(
 // Reset password
 router.post(
   '/reset-password',
-  auth('Common'),
   validateRequest(authValidations.resetPassword),
   AuthController.resetPassword
 );

@@ -83,7 +83,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     status: {
       type: String,
       enum: UserStatus,
-      default: UserStatus.Unverified,
+      default: UserStatus.Active,
     },
     isResetPassword: {
       type: Boolean,
