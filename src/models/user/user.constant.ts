@@ -1,0 +1,5 @@
+export const Gender = ['Male', 'Female'];
+export const USER_UPLOADS_FOLDER = 'uploads/users';
+export const UserRoles = ['User', 'Admin', 'Super_Admin'];
+
+export const USER_UPLOAD_FOLDER = 'uploads/users';
