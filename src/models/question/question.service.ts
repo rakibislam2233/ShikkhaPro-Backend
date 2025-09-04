@@ -201,7 +201,7 @@ class QuestionService {
 
       return await this.createQuestion(questionData, userId);
     } catch (error) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Failed to generate question');
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to generate question');
     }
   }
 
@@ -248,7 +248,7 @@ class QuestionService {
 
       return await question.save();
     } catch (error) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Failed to improve question');
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to improve question');
     }
   }
 

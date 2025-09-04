@@ -1,4 +1,4 @@
-import httpStatus from 'http-status';
+import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { QuizAttempt } from './quizAttempt.model';
 import { Quiz } from '../quiz/quiz.model';
@@ -15,20 +15,23 @@ import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
 class QuizAttemptService {
-  async startQuizAttempt(request: IStartQuizAttemptRequest, userId: string): Promise<IQuizAttempt> {
+  async startQuizAttempt(
+    request: IStartQuizAttemptRequest,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const quiz = await Quiz.findById(request.quizId);
 
     if (!quiz) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
     }
 
     // Check if quiz is accessible
     if (!quiz.isPublic && quiz.createdBy.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'Access denied to this quiz');
+      throw new ApiError(StatusCodes.FORBIDDEN, 'Access denied to this quiz');
     }
 
     if (quiz.status !== 'published') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz is not published');
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Quiz is not published');
     }
 
     // Check if user already has an in-progress attempt for this quiz
@@ -41,7 +44,8 @@ class QuizAttemptService {
     if (existingAttempt) {
       // Check if time limit exceeded
       if (existingAttempt.timeLimit) {
-        const timeElapsed = (Date.now() - existingAttempt.startedAt.getTime()) / (1000 * 60);
+        const timeElapsed =
+          (Date.now() - existingAttempt.startedAt.getTime()) / (1000 * 60);
         if (timeElapsed > existingAttempt.timeLimit) {
           existingAttempt.status = 'abandoned';
           await existingAttempt.save();
@@ -64,28 +68,38 @@ class QuizAttemptService {
     return await attempt.save();
   }
 
-  async submitAnswer(request: ISubmitAnswerRequest, userId: string): Promise<IQuizAttempt> {
+  async submitAnswer(
+    request: ISubmitAnswerRequest,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const attempt = await QuizAttempt.findById(request.attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only submit answers for your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only submit answers for your own attempts'
+      );
     }
 
     if (attempt.status !== 'in-progress') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz attempt is not in progress');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Quiz attempt is not in progress'
+      );
     }
 
     // Check if time limit exceeded
     if (attempt.timeLimit) {
-      const timeElapsed = (Date.now() - attempt.startedAt.getTime()) / (1000 * 60);
+      const timeElapsed =
+        (Date.now() - attempt.startedAt.getTime()) / (1000 * 60);
       if (timeElapsed > attempt.timeLimit) {
         attempt.status = 'abandoned';
         await attempt.save();
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Time limit exceeded');
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Time limit exceeded');
       }
     }
 
@@ -93,19 +107,28 @@ class QuizAttemptService {
     return await attempt.save();
   }
 
-  async saveAnswers(request: ISaveAnswerRequest, userId: string): Promise<IQuizAttempt> {
+  async saveAnswers(
+    request: ISaveAnswerRequest,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const attempt = await QuizAttempt.findById(request.attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only save answers for your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only save answers for your own attempts'
+      );
     }
 
     if (attempt.status !== 'in-progress') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz attempt is not in progress');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Quiz attempt is not in progress'
+      );
     }
 
     // Update answers
@@ -116,19 +139,30 @@ class QuizAttemptService {
     return await attempt.save();
   }
 
-  async flagQuestion(attemptId: string, questionId: string, flagged: boolean, userId: string): Promise<IQuizAttempt> {
+  async flagQuestion(
+    attemptId: string,
+    questionId: string,
+    flagged: boolean,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const attempt = await QuizAttempt.findById(attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only flag questions for your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only flag questions for your own attempts'
+      );
     }
 
     if (attempt.status !== 'in-progress') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz attempt is not in progress');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Quiz attempt is not in progress'
+      );
     }
 
     if (flagged) {
@@ -136,30 +170,41 @@ class QuizAttemptService {
         attempt.flaggedQuestions.push(questionId);
       }
     } else {
-      attempt.flaggedQuestions = attempt.flaggedQuestions.filter(id => id !== questionId);
+      attempt.flaggedQuestions = attempt.flaggedQuestions.filter(
+        id => id !== questionId
+      );
     }
 
     return await attempt.save();
   }
 
-  async completeQuizAttempt(request: ICompleteQuizAttemptRequest, userId: string): Promise<IQuizResult> {
+  async completeQuizAttempt(
+    request: ICompleteQuizAttemptRequest,
+    userId: string
+  ): Promise<IQuizResult> {
     const attempt = await QuizAttempt.findById(request.attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only complete your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only complete your own attempts'
+      );
     }
 
     if (attempt.status !== 'in-progress') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz attempt is not in progress');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Quiz attempt is not in progress'
+      );
     }
 
     const quiz = await Quiz.findById(attempt.quizId);
     if (!quiz) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
     }
 
     // Mark as completed
@@ -176,17 +221,23 @@ class QuizAttemptService {
     return this.generateQuizResult(attempt, quiz);
   }
 
-  async getQuizAttemptById(attemptId: string, userId: string): Promise<IQuizAttempt> {
+  async getQuizAttemptById(
+    attemptId: string,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const attempt = await QuizAttempt.findById(attemptId)
       .populate('quizId', 'title subject topic difficulty timeLimit')
       .populate('userId', 'profile.fullName email');
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId._id.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only view your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only view your own attempts'
+      );
     }
 
     return attempt;
@@ -209,53 +260,63 @@ class QuizAttemptService {
     if (filters?.status) {
       query.status = filters.status;
     }
+    options.populate = [
+      {
+        path: 'quizId',
+        select: 'title subject topic difficulty timeLimit totalPoints',
+      },
+    ];
+    options.sortBy = options.sortBy || 'createdAt';
 
-    return await QuizAttempt.paginate(query, {
-      ...options,
-      sort: options.sortBy ? { [options.sortBy]: options.sortOrder === 'desc' ? -1 : 1 } : { createdAt: -1 },
-      populate: [
-        { path: 'quizId', select: 'title subject topic difficulty timeLimit totalPoints' },
-      ],
-    });
+    return await QuizAttempt.paginate(query, options);
   }
 
-  async getQuizAttempts(quizId: string, options: IPaginateOptions): Promise<IPaginateResult<IQuizAttempt>> {
+  async getQuizAttempts(
+    quizId: string,
+    options: IPaginateOptions
+  ): Promise<IPaginateResult<IQuizAttempt>> {
     const query = { quizId, status: 'completed' };
-
-    return await QuizAttempt.paginate(query, {
-      ...options,
-      sort: { score: -1, completedAt: -1 },
-      populate: [
-        { path: 'userId', select: 'profile.fullName email' },
-        { path: 'quizId', select: 'title subject topic' },
-      ],
-    });
+    options.populate = [
+      { path: 'userId', select: 'profile.fullName email' },
+      { path: 'quizId', select: 'title subject topic' },
+    ];
+    options.sortBy = options.sortBy || 'createdAt';
+    return await QuizAttempt.paginate(query, options);
   }
 
   async getQuizResult(attemptId: string, userId: string): Promise<IQuizResult> {
     const attempt = await QuizAttempt.findById(attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only view your own results');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only view your own results'
+      );
     }
 
     if (attempt.status !== 'completed') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Quiz attempt is not completed');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Quiz attempt is not completed'
+      );
     }
 
     const quiz = await Quiz.findById(attempt.quizId);
     if (!quiz) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
     }
 
     return this.generateQuizResult(attempt, quiz);
   }
 
-  async getUserStats(userId: string, filters?: { timeframe?: string; subject?: string; academicLevel?: string }): Promise<IQuizStats> {
+  async getUserStats(
+    userId: string,
+    filters?: { timeframe?: string; subject?: string; academicLevel?: string }
+  ): Promise<IQuizStats> {
     const baseStats = await QuizAttempt.getUserStats(userId);
 
     // Apply additional filters if needed
@@ -268,12 +329,12 @@ class QuizAttemptService {
           from: 'quizzes',
           localField: 'quizId',
           foreignField: '_id',
-          as: 'quiz'
+          as: 'quiz',
         },
         $match: {
           ...additionalQuery,
-          'quiz.subject': filters.subject
-        }
+          'quiz.subject': filters.subject,
+        },
       };
     }
 
@@ -313,19 +374,28 @@ class QuizAttemptService {
     return await QuizAttempt.getLeaderboard(quizId, limit);
   }
 
-  async abandonAttempt(attemptId: string, userId: string): Promise<IQuizAttempt> {
+  async abandonAttempt(
+    attemptId: string,
+    userId: string
+  ): Promise<IQuizAttempt> {
     const attempt = await QuizAttempt.findById(attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only abandon your own attempts');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only abandon your own attempts'
+      );
     }
 
     if (attempt.status !== 'in-progress') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Only in-progress attempts can be abandoned');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Only in-progress attempts can be abandoned'
+      );
     }
 
     attempt.status = 'abandoned';
@@ -336,11 +406,14 @@ class QuizAttemptService {
     const attempt = await QuizAttempt.findById(attemptId);
 
     if (!attempt) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Quiz attempt not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
     }
 
     if (attempt.userId.toString() !== userId) {
-      throw new ApiError(httpStatus.FORBIDDEN, 'You can only view your own attempt progress');
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        'You can only view your own attempt progress'
+      );
     }
 
     const answeredQuestions = attempt.answers.size;
@@ -349,7 +422,8 @@ class QuizAttemptService {
 
     let timeRemaining = null;
     if (attempt.timeLimit) {
-      const timeElapsed = (Date.now() - attempt.startedAt.getTime()) / (1000 * 60);
+      const timeElapsed =
+        (Date.now() - attempt.startedAt.getTime()) / (1000 * 60);
       timeRemaining = Math.max(0, attempt.timeLimit - timeElapsed);
     }
 
@@ -366,8 +440,15 @@ class QuizAttemptService {
     };
   }
 
-  private async updateQuizStats(quizId: mongoose.Types.ObjectId, score: number, totalScore: number): Promise<void> {
-    const attempts = await QuizAttempt.countDocuments({ quizId, status: 'completed' });
+  private async updateQuizStats(
+    quizId: mongoose.Types.ObjectId,
+    score: number,
+    totalScore: number
+  ): Promise<void> {
+    const attempts = await QuizAttempt.countDocuments({
+      quizId,
+      status: 'completed',
+    });
     const avgResult = await QuizAttempt.aggregate([
       { $match: { quizId, status: 'completed' } },
       { $group: { _id: null, averageScore: { $avg: '$score' } } },
@@ -385,18 +466,21 @@ class QuizAttemptService {
       let isCorrect = false;
 
       if (question.type === 'multiple-select') {
-        const correctAnswers = Array.isArray(question.correctAnswer) 
-          ? question.correctAnswer 
+        const correctAnswers = Array.isArray(question.correctAnswer)
+          ? question.correctAnswer
           : [question.correctAnswer];
-        const userAnswers = Array.isArray(userAnswer) 
-          ? userAnswer 
+        const userAnswers = Array.isArray(userAnswer)
+          ? userAnswer
           : [userAnswer];
-        
-        isCorrect = correctAnswers.length === userAnswers.length &&
+
+        isCorrect =
+          correctAnswers.length === userAnswers.length &&
           correctAnswers.every((ans: string) => userAnswers.includes(ans));
       } else {
-        isCorrect = String(userAnswer || '').toLowerCase().trim() === 
-          String(question.correctAnswer).toLowerCase().trim();
+        isCorrect =
+          String(userAnswer || '')
+            .toLowerCase()
+            .trim() === String(question.correctAnswer).toLowerCase().trim();
       }
 
       return {
@@ -421,7 +505,11 @@ class QuizAttemptService {
     else if (percentage >= 60) grade = 'C';
     else if (percentage >= 50) grade = 'D';
 
-    const recommendations = this.generateRecommendations(detailedResults, quiz, percentage);
+    const recommendations = this.generateRecommendations(
+      detailedResults,
+      quiz,
+      percentage
+    );
 
     return {
       attempt,
@@ -438,19 +526,29 @@ class QuizAttemptService {
     };
   }
 
-  private generateRecommendations(detailedResults: any[], quiz: any, percentage: number): string[] {
+  private generateRecommendations(
+    detailedResults: any[],
+    quiz: any,
+    percentage: number
+  ): string[] {
     const recommendations = [];
     const incorrectQuestions = detailedResults.filter(r => !r.isCorrect);
 
     if (percentage < 60) {
-      recommendations.push(`Consider reviewing the basics of ${quiz.subject} - ${quiz.topic}`);
+      recommendations.push(
+        `Consider reviewing the basics of ${quiz.subject} - ${quiz.topic}`
+      );
       recommendations.push('Practice more questions on this topic');
       recommendations.push('Focus on understanding the fundamental concepts');
     } else if (percentage < 80) {
-      recommendations.push('Good job! Focus on understanding the concepts you missed');
+      recommendations.push(
+        'Good job! Focus on understanding the concepts you missed'
+      );
       recommendations.push('Review the explanations for incorrect answers');
     } else if (percentage < 95) {
-      recommendations.push('Excellent performance! You have a strong grasp of the topic');
+      recommendations.push(
+        'Excellent performance! You have a strong grasp of the topic'
+      );
       recommendations.push('Review minor areas of improvement');
     } else {
       recommendations.push('Outstanding! You have mastered this topic');
@@ -459,17 +557,21 @@ class QuizAttemptService {
 
     if (incorrectQuestions.length > 0) {
       const difficultyCounts = incorrectQuestions.reduce((acc: any, q: any) => {
-        const difficulty = quiz.questions.find((qq: any) => qq.id === q.questionId)?.difficulty;
+        const difficulty = quiz.questions.find(
+          (qq: any) => qq.id === q.questionId
+        )?.difficulty;
         acc[difficulty] = (acc[difficulty] || 0) + 1;
         return acc;
       }, {});
 
-      const mostMissedDifficulty = Object.keys(difficultyCounts).reduce((a, b) => 
-        difficultyCounts[a] > difficultyCounts[b] ? a : b
+      const mostMissedDifficulty = Object.keys(difficultyCounts).reduce(
+        (a, b) => (difficultyCounts[a] > difficultyCounts[b] ? a : b)
       );
 
       if (mostMissedDifficulty) {
-        recommendations.push(`Focus more on ${mostMissedDifficulty} level questions`);
+        recommendations.push(
+          `Focus more on ${mostMissedDifficulty} level questions`
+        );
       }
     }
 

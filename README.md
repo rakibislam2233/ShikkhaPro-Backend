@@ -1,323 +1,415 @@
-# Flight Booking Backend API
+# 📚 Exam QA Generator Backend
 
-A comprehensive Node.js backend API for flight booking and compensation services, built with Express.js, TypeScript, and MongoDB. This API integrates with FlightAware's AeroAPI to provide real-time flight data and supports various flight-related operations.
+A comprehensive backend API for an intelligent exam question and answer generator built with Node.js, Express, TypeScript, MongoDB, and OpenAI integration.
 
 ## 🚀 Features
 
-### Flight Services
-- **Flight Data Integration**: Powered by OpenFlights database and OpenSky Network for comprehensive flight information
-- **Flight Verification**: Verify flight existence using OpenSky Network's real-time ADS-B data
-- **Airlines & Airports**: Search and retrieve airline and airport data from OpenFlights database with US-specific filtering
-- **Route Search**: Find flights by origin and destination airports using OpenSky tracking data
+- 🤖 **AI-Powered Quiz Generation** - Generate intelligent quizzes using OpenAI GPT-4
+- 🌐 **Multi-Language Support** - English, Bengali, and Hindi language support
+- 📊 **Comprehensive Analytics** - Track quiz attempts, scores, and user statistics
+- 🏆 **Leaderboards & Achievements** - Competitive elements with ranking systems
+- 🔐 **Secure Authentication** - JWT-based authentication with role management
+- 📚 **Academic Level Support** - From Class 1 to MSc level questions
+- 🎯 **Multiple Question Types** - MCQ, True/False, Short Answer, Multiple Select
+- 📈 **Real-time Progress Tracking** - Monitor quiz attempts in real-time
+- 🚀 **Scalable Architecture** - Built with scalability and performance in mind
 
-### User Management
-- **Authentication & Authorization**: JWT-based secure authentication system
-- **User Profiles**: Complete user registration and profile management
-- **OTP Verification**: Secure OTP-based email verification
+## 🛠️ Technology Stack
 
-### Compensation Services
-- **Flight Disruption Claims**: Handle flight delay, cancellation, and denial boarding claims
-- **Automatic Eligibility**: Check compensation eligibility based on flight data
-- **Claim Management**: Process and track compensation claims
-
-### Additional Services
-- **Notifications**: Real-time notification system with Socket.io
-- **Testimonials**: Customer testimonial management
-- **Settings Management**: About Us, Privacy Policy, Terms & Conditions
-- **Email Services**: Automated email notifications
-- **File Uploads**: AWS S3 integration for file storage
-
-## 🛠 Tech Stack
-
-- **Runtime**: Node.js with TypeScript
+- **Runtime**: Node.js
 - **Framework**: Express.js
+- **Language**: TypeScript
 - **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT with Passport.js
-- **Flight Data**: OpenFlights Database + OpenSky Network API
-- **File Storage**: AWS S3
-- **Real-time**: Socket.io
-- **Email**: Nodemailer with SMTP
+- **AI Integration**: OpenAI GPT-4
+- **Authentication**: JWT
 - **Validation**: Zod
-- **Security**: Helmet, CORS, Rate Limiting, XSS Protection
+- **Security**: Helmet, CORS, Rate Limiting
+- **Development**: ts-node-dev, ESLint, Prettier
 
-## 📦 Installation
+## 📋 Prerequisites
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd flight-booking-backend
-   ```
+Before you begin, ensure you have the following installed:
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+- **Node.js** (v16 or higher)
+- **npm** or **yarn**
+- **MongoDB** (v5.0 or higher)
+- **OpenAI API Key**
 
-3. **Set up environment variables**
-   Create a `.env` file in the root directory:
-   ```env
-   # Server Configuration
-   NODE_ENV=development
-   PORT=8083
-   SOCKET=8082
+## 🚀 Quick Start
 
-   # Database
-   MONGODB_URL=mongodb://localhost:27017/flight-booking
+### 1. Clone the Repository
 
-   # JWT Configuration
-   JWT_ACCESS_SECRET=your_access_secret_key
-   JWT_REFRESH_SECRET=your_refresh_secret_key
-   JWT_ACCESS_EXPIRATION_TIME=15m
-   JWT_REFRESH_EXPIRATION_TIME=30d
+```bash
+git clone <repository-url>
+cd exam-qa-generator-backend
+```
 
-   # OpenSky Network API (Optional - for enhanced flight tracking)
-   OPENSKY_USERNAME=your_opensky_username
-   OPENSKY_PASSWORD=your_opensky_password
-   OPENSKY_BASE_URL=https://opensky-network.org/api
+### 2. Install Dependencies
 
-   # Email Configuration
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USERNAME=your_email@gmail.com
-   SMTP_PASSWORD=your_app_password
-   EMAIL_FROM=your_email@gmail.com
+```bash
+npm install
+```
 
-   # AWS S3 Configuration
-   AWS_ACCESS_KEY_ID=your_aws_access_key
-   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-   AWS_REGION=us-east-1
-   AWS_S3_BUCKET_NAME=your-bucket-name
+### 3. Set Up Environment Variables
 
-   # Client URL
-   CLIENT_URL=http://localhost:3000
+Create a `.env` file in the root directory:
 
-   # Additional API Keys
-   GOOGLE_MAPS_API_KEY=your_google_maps_key
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-   ```
+```env
+# Server Configuration
+NODE_ENV=development
+PORT=8083
+SOCKET=8082
 
-4. **Seed flight data (airlines & airports)**
-   ```bash
-   npm run seed:flights
-   ```
+# Database
+MONGODB_URL=mongodb://localhost:27017/exam-qa-generator
 
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+# JWT Configuration
+JWT_ACCESS_SECRET=your-super-secret-jwt-access-key-here
+JWT_REFRESH_SECRET=your-super-secret-jwt-refresh-key-here
+JWT_ACCESS_EXPIRATION_TIME=5d
+JWT_REFRESH_EXPIRATION_TIME=365d
 
-## 🔧 Available Scripts
+# OpenAI Configuration (Required)
+OPENAI_API_KEY=sk-your-openai-api-key-here
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build the project for production
-- `npm start` - Start production server
-- `npm run lint:check` - Check for linting errors
-- `npm run lint:fix` - Fix linting errors
-- `npm run prettier:check` - Check code formatting
-- `npm run prettier:fix` - Fix code formatting
-- `npm run seeder` - Run database seeder
-- `npm run seed:flights` - Seed flight data (airlines & airports) from OpenFlights
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+DEV_ALLOWED_ORIGINS=http://localhost:8080,http://localhost:8081
 
-## 🛣 API Routes
+# Email Configuration (Optional)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+EMAIL_FROM=your-email@gmail.com
 
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/verify-email` - Email verification
-- `POST /api/auth/forgot-password` - Password reset request
-- `POST /api/auth/reset-password` - Reset password
+# AWS S3 Configuration (Optional)
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET_NAME=your-bucket-name
 
-### Flight Services
-- `GET /api/flights/airlines` - Get all airlines with search and pagination
-- `GET /api/flights/airports` - Get all airports with search and pagination
-- `POST /api/flights/verify` - Verify flight existence and details
-- `GET /api/flights/info/:flightId` - Get specific flight information
-- `GET /api/flights/search` - Search flights by route
+# Security Configuration
+BCRYPT_SALT_ROUNDS=12
+MAX_LOGIN_ATTEMPTS=5
+LOCK_TIME=2
+```
 
-### User Management
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
-- `DELETE /api/users/account` - Delete user account
+### 4. Start the Development Server
 
-### Compensation Claims
-- `POST /api/compensation` - Submit compensation claim
-- `GET /api/compensation` - Get user's claims
-- `GET /api/compensation/:id` - Get specific claim details
-- `PUT /api/compensation/:id` - Update claim status
+```bash
+# Development mode with hot reload
+npm run dev
 
-### Notifications
-- `GET /api/notifications` - Get user notifications
-- `PUT /api/notifications/:id/read` - Mark notification as read
+# Build for production
+npm run build
 
-### Settings
-- `GET /api/settings/about-us` - Get about us content
-- `GET /api/settings/privacy-policy` - Get privacy policy
-- `GET /api/settings/terms-conditions` - Get terms and conditions
+# Start production server
+npm start
+```
 
-## 🔌 Flight Data Integration
+The server will start on `http://localhost:8083`
 
-This API uses a combination of **OpenFlights Database** and **OpenSky Network API** for comprehensive flight data:
+## 📚 API Documentation
 
-### OpenFlights Database Integration
-**OpenFlights** provides free, comprehensive airline and airport data stored in MongoDB:
-- **Airlines**: 7,000+ airlines with IATA/ICAO codes, callsigns, and country information
-- **Airports**: 10,000+ airports worldwide with coordinates, timezones, and detailed location data
-- **Storage**: Stored in MongoDB with optimized indexes for fast search and pagination
-- **Auto-seeding**: Data automatically seeds on first API call if not present
-- **Manual seeding**: Run `npm run seed:flights` to populate data manually
-- **Cost**: Completely free with no API keys required
+### Base URL
+```
+http://localhost:8083/api/v1
+```
 
-### OpenSky Network Integration
-**OpenSky Network** provides real-time flight tracking using crowd-sourced ADS-B data:
-- **Real-time Tracking**: Live aircraft positions and flight status
-- **Flight Verification**: Verify flight existence using actual flight data
-- **Historical Data**: Access to flight history (with registered account)
-- **Cost**: Free for non-commercial use with rate limits
+### Core Endpoints
 
-### Getting Started
+#### 🔐 Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/verify-otp` - OTP verification
+- `POST /auth/forgot-password` - Password reset
 
-#### Anonymous Usage (Limited)
-The system works immediately with no configuration required:
-- OpenFlights data seeds automatically into MongoDB on first API call
-- OpenSky API works with anonymous access (limited to current data)
-- Run `npm run seed:flights` to pre-populate flight data (recommended)
+#### 📝 Quiz Management
+- `POST /quizzes/generate` - Generate AI-powered quiz
+- `POST /quizzes` - Create custom quiz
+- `GET /quizzes/:id` - Get quiz by ID
+- `GET /quizzes/public` - Get public quizzes
+- `GET /quizzes/search` - Search quizzes with filters
+- `PATCH /quizzes/:id` - Update quiz
+- `DELETE /quizzes/:id` - Delete quiz
 
-#### Enhanced Usage (Recommended)
-For better OpenSky API limits and historical data:
-1. **Sign up** for a free OpenSky account at [opensky-network.org](https://opensky-network.org)
-2. **Add credentials** to your `.env` file:
-   ```env
-   OPENSKY_USERNAME=your_username
-   OPENSKY_PASSWORD=your_password
-   ```
+#### ❓ Question Management
+- `POST /questions` - Create question
+- `POST /questions/generate` - Generate AI question
+- `GET /questions/approved` - Get approved questions
+- `GET /questions/search` - Search questions
+- `PATCH /questions/:id/approve` - Approve question (Admin)
 
-### Rate Limits
-- **Anonymous Users**: 400 API credits/day, current data only
-- **Registered Users**: 4,000+ API credits/day, historical data access
-- **OpenFlights**: No rate limits (data stored in MongoDB with optimized queries)
+#### 🎯 Quiz Attempts
+- `POST /quiz-attempts/start` - Start quiz attempt
+- `POST /quiz-attempts/answer` - Submit answer
+- `POST /quiz-attempts/complete` - Complete quiz
+- `GET /quiz-attempts/result/:attemptId` - Get results
+- `GET /quiz-attempts/stats/user` - User statistics
+- `GET /quiz-attempts/stats/leaderboard` - Leaderboard
 
-### Database Performance Features
-- **MongoDB Indexes**: Text search, geospatial, and compound indexes for fast queries
-- **Pagination**: Efficient cursor-based pagination for large datasets  
-- **Search**: Full-text search across airline/airport names, cities, and codes
-- **Filtering**: Advanced filtering by country, IATA/ICAO codes, and US-specific data
+For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
 
-## 📊 Database Schema
+## 🏗️ Project Structure
 
-### Users Collection
-```javascript
+```
+src/
+├── app.ts                 # Express app configuration
+├── server.ts              # Server entry point
+├── config/               # Configuration files
+│   └── index.ts          # Environment configuration
+├── models/               # Database models & business logic
+│   ├── auth/            # Authentication
+│   ├── user/            # User management
+│   ├── quiz/            # Quiz management
+│   ├── question/        # Question management
+│   └── quizAttempt/     # Quiz attempts & results
+├── services/            # External services
+│   └── openai.service.ts # OpenAI integration
+├── middlewares/         # Express middlewares
+│   ├── auth.ts          # Authentication middleware
+│   └── globalErrorHandler.ts
+├── shared/              # Shared utilities
+│   ├── catchAsync.ts    # Async error handler
+│   ├── sendResponse.ts  # Response formatter
+│   └── validateRequest.ts # Request validation
+├── routes/              # Route definitions
+└── types/               # TypeScript definitions
+```
+
+## 🎯 Core Features
+
+### 1. AI-Powered Quiz Generation
+
+Generate intelligent quizzes with customizable parameters:
+
+```typescript
 {
-  _id: ObjectId,
-  firstName: String,
-  lastName: String,
-  email: String (unique),
-  password: String (hashed),
-  isEmailVerified: Boolean,
-  role: String (enum: ['user', 'admin']),
-  createdAt: Date,
-  updatedAt: Date
+  "academicLevel": "class-10",
+  "subject": "Mathematics",
+  "topic": "Algebra",
+  "language": "english",
+  "questionType": "mcq",
+  "difficulty": "medium",
+  "questionCount": 10,
+  "timeLimit": 30
 }
 ```
 
-### Compensation Claims
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId (ref: 'User'),
-  flightDetails: {
-    flightNumber: String,
-    departureDate: Date,
-    route: {
-      from: String,
-      to: String
-    }
-  },
-  disruptionType: String (enum: ['delay', 'cancellation', 'denied-boarding']),
-  status: String (enum: ['pending', 'processing', 'approved', 'rejected']),
-  compensationAmount: Number,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
+### 2. Multi-Language Support
+
+Support for three languages:
+- English
+- Bengali (বাংলা)
+- Hindi (हिंदी)
+
+### 3. Academic Levels
+
+Comprehensive coverage from basic to advanced:
+- Primary: Class 1-7
+- Secondary: JSC, SSC
+- Higher Secondary: HSC
+- University: BSc, MSc
+
+### 4. Question Types
+
+Multiple question formats:
+- Multiple Choice Questions (MCQ)
+- True/False
+- Short Answer
+- Multiple Select
+- Mixed Types
+
+### 5. Real-time Analytics
+
+Track performance with detailed analytics:
+- User statistics
+- Quiz performance metrics
+- Time-based analytics
+- Subject-wise progress
 
 ## 🔒 Security Features
 
 - **JWT Authentication** with access and refresh tokens
-- **Password Hashing** using bcrypt with configurable salt rounds
-- **Rate Limiting** to prevent abuse
-- **CORS Protection** with configurable origins
-- **XSS Protection** using express-xss-sanitizer
-- **MongoDB Injection Protection** using express-mongo-sanitize
-- **Helmet Security Headers** for additional protection
+- **Rate Limiting** to prevent API abuse
 - **Input Validation** using Zod schemas
+- **XSS Protection** with sanitization
+- **CORS Configuration** for cross-origin requests
+- **Helmet Security** headers
+- **MongoDB Injection** prevention
+- **Password Hashing** with bcrypt
 
-## 🌍 Environment Configuration
+## 🚀 Deployment
 
-The application supports multiple environments:
+### Using PM2 (Recommended)
 
-- **Development**: Full logging, detailed error messages
-- **Production**: Optimized performance, security-focused
-- **Testing**: Isolated test database and configurations
+```bash
+# Install PM2 globally
+npm install -g pm2
 
-## 📝 API Documentation
+# Build the project
+npm run build
 
-### Error Responses
-All API endpoints return consistent error responses:
+# Start with PM2
+pm2 start dist/server.js --name "exam-qa-backend"
 
-```javascript
-{
-  "success": false,
-  "message": "Error description",
-  "code": "ERROR_CODE",
-  "data": null
-}
+# Save PM2 configuration
+pm2 save
+pm2 startup
 ```
 
-### Success Responses
-```javascript
-{
-  "success": true,
-  "message": "Operation successful",
-  "data": {
-    // Response data
-  }
-}
+### Using Docker
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY dist ./dist
+
+EXPOSE 8083
+
+CMD ["node", "dist/server.js"]
 ```
+
+### Environment Variables for Production
+
+```env
+NODE_ENV=production
+PORT=8083
+MONGODB_URL=mongodb://your-production-db-url
+OPENAI_API_KEY=your-production-openai-key
+JWT_ACCESS_SECRET=your-production-jwt-secret
+JWT_REFRESH_SECRET=your-production-jwt-refresh-secret
+```
+
+## 🧪 Testing
+
+### Manual Testing
+
+Use tools like Postman, Thunder Client, or cURL to test the API endpoints.
+
+### Example Test Flow
+
+1. **Register a new user**
+```bash
+curl -X POST http://localhost:8083/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "address": "123 Main St"
+  }'
+```
+
+2. **Login and get token**
+```bash
+curl -X POST http://localhost:8083/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
+3. **Generate a quiz**
+```bash
+curl -X POST http://localhost:8083/api/v1/quizzes/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "academicLevel": "class-10",
+    "subject": "Mathematics",
+    "topic": "Algebra",
+    "language": "english",
+    "questionType": "mcq",
+    "difficulty": "medium",
+    "questionCount": 5
+  }'
+```
+
+## 📊 Performance Considerations
+
+- **Database Indexing**: Optimized indexes for frequent queries
+- **Pagination**: All list endpoints support pagination
+- **Caching**: Consider implementing Redis for session caching
+- **Rate Limiting**: Built-in protection against API abuse
+- **Connection Pooling**: MongoDB connection optimization
+- **Response Compression**: Gzip compression enabled
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### Development Guidelines
+
+- Follow TypeScript best practices
+- Use ESLint and Prettier for code formatting
+- Write meaningful commit messages
+- Add proper error handling
+- Include input validation
+- Follow RESTful API conventions
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **MongoDB Connection Error**
+   - Ensure MongoDB is running
+   - Check connection string in `.env`
+   - Verify network connectivity
+
+2. **OpenAI API Error**
+   - Verify API key is correct
+   - Check API quota and billing
+   - Ensure network access to OpenAI
+
+3. **JWT Token Issues**
+   - Check token expiration
+   - Verify secret keys match
+   - Ensure proper Authorization header format
+
+4. **Port Already in Use**
+   - Change PORT in `.env` file
+   - Kill existing processes: `lsof -ti:8083 | xargs kill -9`
+
+### Debugging
+
+Enable debug logs by setting:
+```env
+NODE_ENV=development
+```
+
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-For support and questions:
-- Create an issue in the repository
+- OpenAI for providing the GPT-4 API
+- MongoDB team for the excellent database
+- Express.js community for the robust framework
+- TypeScript team for type safety
+
+## 📞 Support
+
+For questions, issues, or contributions:
+
+- Create an issue on GitHub
 - Contact the development team
-- Check FlightAware documentation for API-related issues
-
-## 🚦 Getting Support for Flight APIs
-
-### OpenFlights Database
-- **Documentation**: [OpenFlights Data Page](https://openflights.org/data.php)
-- **GitHub Repository**: [OpenFlights on GitHub](https://github.com/jpatokal/openflights)
-- **Data Format**: CSV files with detailed field descriptions
-
-### OpenSky Network API  
-- **Documentation**: [OpenSky API Documentation](https://openskynetwork.github.io/opensky-api/)
-- **REST API Guide**: [OpenSky REST API](https://openskynetwork.github.io/opensky-api/rest.html)
-- **Python Examples**: [OpenSky API Examples](https://github.com/openskynetwork/opensky-api)
-- **Data Portal**: [OpenSky Network](https://opensky-network.org/)
+- Check the documentation
 
 ---
 
-Made with ❤️ for aviation enthusiasts and travelers worldwide.
+**Happy Coding! 🚀**

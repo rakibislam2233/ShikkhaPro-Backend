@@ -6,11 +6,7 @@ import sendResponse from '../../shared/sendResponse';
 import { IUser, UserRoles } from '../user/user.interface';
 import pick from '../../shared/pick';
 
-interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
-
-const createQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const createQuestion = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
   if (!userId) {
     return sendResponse(res, {
@@ -28,7 +24,7 @@ const createQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respons
   });
 });
 
-const getQuestionById = catchAsync(async (req: Request, res: Response) => {
+const getQuestionById = catchAsync(async (req: Request, res) => {
   const { id } = req.params;
   const question = await questionService.getQuestionById(id);
 
@@ -39,7 +35,7 @@ const getQuestionById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const updateQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
   const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
@@ -60,7 +56,7 @@ const updateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respons
   });
 });
 
-const deleteQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const deleteQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
   const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
@@ -80,7 +76,7 @@ const deleteQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respons
   });
 });
 
-const getUserQuestions = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const getUserQuestions = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
   
   if (!userId) {
@@ -100,7 +96,7 @@ const getUserQuestions = catchAsync(async (req: AuthenticatedRequest, res: Respo
   });
 });
 
-const getApprovedQuestions = catchAsync(async (req: Request, res: Response) => {
+const getApprovedQuestions = catchAsync(async (req: Request, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
   const result = await questionService.getApprovedQuestions(options);
 
@@ -111,7 +107,7 @@ const getApprovedQuestions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const searchQuestions = catchAsync(async (req: Request, res: Response) => {
+const searchQuestions = catchAsync(async (req: Request, res) => {
   const filters = pick(req.query, [
     'subject', 'topic', 'academicLevel', 'difficulty', 'questionType', 
     'language', 'tags', 'isApproved', 'dateRange'
@@ -153,7 +149,7 @@ const searchQuestions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const approveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const approveQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { isApproved } = req.body;
   
@@ -175,7 +171,7 @@ const approveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
-const generateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const generateQuestion = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
   
   if (!userId) {
@@ -198,7 +194,7 @@ const generateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respo
   });
 });
 
-const improveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+const improveQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { feedback } = req.body;
   const userId = req.user?._id?.toString();
@@ -219,7 +215,7 @@ const improveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
-const getQuestionsBySubject = catchAsync(async (req: Request, res: Response) => {
+const getQuestionsBySubject = catchAsync(async (req: Request, res) => {
   const { subject } = req.params;
   const questions = await questionService.getQuestionsBySubject(subject);
 
@@ -230,7 +226,7 @@ const getQuestionsBySubject = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
-const getQuestionsByTopic = catchAsync(async (req: Request, res: Response) => {
+const getQuestionsByTopic = catchAsync(async (req: Request, res) => {
   const { topic } = req.params;
   const questions = await questionService.getQuestionsByTopic(topic);
 
@@ -241,7 +237,7 @@ const getQuestionsByTopic = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getQuestionStats = catchAsync(async (req: Request, res: Response) => {
+const getQuestionStats = catchAsync(async (req: Request, res) => {
   const stats = await questionService.getQuestionStats();
 
   sendResponse(res, {

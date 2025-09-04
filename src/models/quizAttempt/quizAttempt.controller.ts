@@ -1,287 +1,291 @@
 import { Request, Response } from 'express';
-import httpStatus from 'http-status';
 import catchAsync from '../../shared/catchAsync';
 import { quizAttemptService } from './quizAttempt.service';
 import sendResponse from '../../shared/sendResponse';
 import { IUser } from '../user/user.interface';
 import pick from '../../shared/pick';
+import { StatusCodes } from 'http-status-codes';
 
-interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
+const startQuizAttempt = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-const startQuizAttempt = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
+
+    const attempt = await quizAttemptService.startQuizAttempt(req.body, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.CREATED,
+      message: 'Quiz attempt started successfully',
+      data: attempt,
     });
   }
+);
 
-  const attempt = await quizAttemptService.startQuizAttempt(req.body, userId);
+const submitAnswer = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: 'Quiz attempt started successfully',
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const submitAnswer = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const attempt = await quizAttemptService.submitAnswer(req.body, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Answer submitted successfully',
+      data: attempt,
     });
   }
+);
 
-  const attempt = await quizAttemptService.submitAnswer(req.body, userId);
+const saveAnswers = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Answer submitted successfully',
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const saveAnswers = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const attempt = await quizAttemptService.saveAnswers(req.body, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Answers saved successfully',
+      data: attempt,
     });
   }
+);
 
-  const attempt = await quizAttemptService.saveAnswers(req.body, userId);
+const flagQuestion = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Answers saved successfully',
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const flagQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const { attemptId, questionId, flagged } = req.body;
+    const attempt = await quizAttemptService.flagQuestion(
+      attemptId,
+      questionId,
+      flagged ?? true,
+      userId
+    );
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: `Question ${flagged ? 'flagged' : 'unflagged'} successfully`,
+      data: attempt,
     });
   }
+);
 
-  const { attemptId, questionId, flagged } = req.body;
-  const attempt = await quizAttemptService.flagQuestion(attemptId, questionId, flagged ?? true, userId);
+const completeQuizAttempt = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: `Question ${flagged ? 'flagged' : 'unflagged'} successfully`,
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const completeQuizAttempt = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const result = await quizAttemptService.completeQuizAttempt(
+      req.body,
+      userId
+    );
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Quiz completed successfully',
+      data: result,
     });
   }
+);
 
-  const result = await quizAttemptService.completeQuizAttempt(req.body, userId);
+const getQuizAttemptById = catchAsync(
+  async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Quiz completed successfully',
-    data: result,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const getQuizAttemptById = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const attempt = await quizAttemptService.getQuizAttemptById(id, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Quiz attempt retrieved successfully',
+      data: attempt,
     });
   }
+);
 
-  const attempt = await quizAttemptService.getQuizAttemptById(id, userId);
+const getUserAttempts = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Quiz attempt retrieved successfully',
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const getUserAttempts = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+    const filters = pick(req.query, ['quizId', 'status']);
+    const result = await quizAttemptService.getUserAttempts(
+      userId,
+      options,
+      filters
+    );
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'User attempts retrieved successfully',
+      data: result,
     });
   }
+);
 
-  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const filters = pick(req.query, ['quizId', 'status']);
-  const result = await quizAttemptService.getUserAttempts(userId, options, filters);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'User attempts retrieved successfully',
-    meta: result.meta,
-    data: result.data,
-  });
-});
-
-const getQuizAttempts = catchAsync(async (req: Request, res: Response) => {
+const getQuizAttempts = catchAsync(async (req: Request, res) => {
   const { quizId } = req.params;
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
   const result = await quizAttemptService.getQuizAttempts(quizId, options);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
+    code: StatusCodes.OK,
     message: 'Quiz attempts retrieved successfully',
-    meta: result.meta,
-    data: result.data,
-  });
-});
-
-const getQuizResult = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const { attemptId } = req.params;
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
-    });
-  }
-
-  const result = await quizAttemptService.getQuizResult(attemptId, userId);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Quiz result retrieved successfully',
     data: result,
   });
 });
 
-const getUserStats = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+const getQuizResult = catchAsync(
+  async (req, res) => {
+    const { attemptId } = req.params;
+    const userId = req.user?._id?.toString();
+
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
+
+    const result = await quizAttemptService.getQuizResult(attemptId, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Quiz result retrieved successfully',
+      data: result,
     });
   }
+);
 
-  const filters = pick(req.query, ['timeframe', 'subject', 'academicLevel']);
-  const stats = await quizAttemptService.getUserStats(userId, filters);
+const getUserStats = catchAsync(
+  async (req, res) => {
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'User statistics retrieved successfully',
-    data: stats,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const getLeaderboard = catchAsync(async (req: Request, res: Response) => {
+    const filters = pick(req.query, ['timeframe', 'subject', 'academicLevel']);
+    const stats = await quizAttemptService.getUserStats(userId, filters);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'User statistics retrieved successfully',
+      data: stats,
+    });
+  }
+);
+
+const getLeaderboard = catchAsync(async (req: Request, res) => {
   const { quizId } = req.query;
   const limit = parseInt(req.query.limit as string) || 10;
   const filters = pick(req.query, ['timeframe', 'subject', 'academicLevel']);
-  
+
   const leaderboard = await quizAttemptService.getLeaderboard(
-    quizId as string || undefined, 
+    (quizId as string) || undefined,
     limit,
     filters
   );
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
+    code: StatusCodes.OK,
     message: 'Leaderboard retrieved successfully',
     data: leaderboard,
   });
 });
 
-const abandonAttempt = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+const abandonAttempt = catchAsync(
+  async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user?._id?.toString();
+
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
+
+    const attempt = await quizAttemptService.abandonAttempt(id, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Quiz attempt abandoned successfully',
+      data: attempt,
     });
   }
+);
 
-  const attempt = await quizAttemptService.abandonAttempt(id, userId);
+const getAttemptProgress = catchAsync(
+  async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user?._id?.toString();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Quiz attempt abandoned successfully',
-    data: attempt,
-  });
-});
+    if (!userId) {
+      return sendResponse(res, {
+        code: StatusCodes.UNAUTHORIZED,
+        message: 'User authentication required',
+      });
+    }
 
-const getAttemptProgress = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user?._id?.toString();
-  
-  if (!userId) {
-    return sendResponse(res, {
-      statusCode: httpStatus.UNAUTHORIZED,
-      success: false,
-      message: 'User authentication required',
+    const progress = await quizAttemptService.getAttemptProgress(id, userId);
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Attempt progress retrieved successfully',
+      data: progress,
     });
   }
-
-  const progress = await quizAttemptService.getAttemptProgress(id, userId);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Attempt progress retrieved successfully',
-    data: progress,
-  });
-});
+);
 
 export const QuizAttemptController = {
   startQuizAttempt,
