@@ -1,0 +1,268 @@
+import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import catchAsync from '../../shared/catchAsync';
+import { questionService } from './question.service';
+import sendResponse from '../../shared/sendResponse';
+import { IUser, UserRoles } from '../user/user.interface';
+import pick from '../../shared/pick';
+
+interface AuthenticatedRequest extends Request {
+  user?: IUser;
+}
+
+const createQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?._id?.toString();
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const question = await questionService.createQuestion(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.CREATED,
+    message: 'Question created successfully',
+    data: question,
+  });
+});
+
+const getQuestionById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const question = await questionService.getQuestionById(id);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Question retrieved successfully',
+    data: question,
+  });
+});
+
+const updateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
+  
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const question = await questionService.updateQuestion(id, req.body, userId, isAdmin);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Question updated successfully',
+    data: question,
+  });
+});
+
+const deleteQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
+  
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  await questionService.deleteQuestion(id, userId, isAdmin);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Question deleted successfully',
+  });
+});
+
+const getUserQuestions = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?._id?.toString();
+  
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await questionService.getUserQuestions(userId, options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'User questions retrieved successfully',
+    data: result,
+  });
+});
+
+const getApprovedQuestions = catchAsync(async (req: Request, res: Response) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await questionService.getApprovedQuestions(options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Approved questions retrieved successfully',
+    data: result,
+  });
+});
+
+const searchQuestions = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, [
+    'subject', 'topic', 'academicLevel', 'difficulty', 'questionType', 
+    'language', 'tags', 'isApproved', 'dateRange'
+  ]);
+  
+  // Parse array filters
+  if (filters.subject && typeof filters.subject === 'string') {
+    filters.subject = filters.subject.split(',');
+  }
+  if (filters.topic && typeof filters.topic === 'string') {
+    filters.topic = filters.topic.split(',');
+  }
+  if (filters.academicLevel && typeof filters.academicLevel === 'string') {
+    filters.academicLevel = filters.academicLevel.split(',');
+  }
+  if (filters.difficulty && typeof filters.difficulty === 'string') {
+    filters.difficulty = filters.difficulty.split(',');
+  }
+  if (filters.questionType && typeof filters.questionType === 'string') {
+    filters.questionType = filters.questionType.split(',');
+  }
+  if (filters.language && typeof filters.language === 'string') {
+    filters.language = filters.language.split(',');
+  }
+  if (filters.tags && typeof filters.tags === 'string') {
+    filters.tags = filters.tags.split(',');
+  }
+  if (filters.isApproved && typeof filters.isApproved === 'string') {
+    filters.isApproved = filters.isApproved === 'true';
+  }
+
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await questionService.searchQuestions(filters, options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Questions retrieved successfully',
+    data: result,
+  });
+});
+
+const approveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { isApproved } = req.body;
+  
+  // Only admins can approve questions
+  const isAdmin = req.user?.role === UserRoles.Admin || req.user?.role === UserRoles.Super_Admin;
+  if (!isAdmin) {
+    return sendResponse(res, {
+      code: StatusCodes.FORBIDDEN,
+      message: 'Admin access required',
+    });
+  }
+
+  const question = await questionService.approveQuestion(id, isApproved);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: `Question ${isApproved ? 'approved' : 'rejected'} successfully`,
+    data: question,
+  });
+});
+
+const generateQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?._id?.toString();
+  
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const { subject, topic, academicLevel, difficulty, questionType, language } = req.body;
+  
+  const question = await questionService.generateQuestion(
+    subject, topic, academicLevel, difficulty, questionType, language || 'english', userId
+  );
+
+  sendResponse(res, {
+    code: StatusCodes.CREATED,
+    message: 'Question generated successfully',
+    data: question,
+  });
+});
+
+const improveQuestion = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { feedback } = req.body;
+  const userId = req.user?._id?.toString();
+  
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const question = await questionService.improveQuestion(id, feedback, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Question improved successfully',
+    data: question,
+  });
+});
+
+const getQuestionsBySubject = catchAsync(async (req: Request, res: Response) => {
+  const { subject } = req.params;
+  const questions = await questionService.getQuestionsBySubject(subject);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Questions by subject retrieved successfully',
+    data: questions,
+  });
+});
+
+const getQuestionsByTopic = catchAsync(async (req: Request, res: Response) => {
+  const { topic } = req.params;
+  const questions = await questionService.getQuestionsByTopic(topic);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Questions by topic retrieved successfully',
+    data: questions,
+  });
+});
+
+const getQuestionStats = catchAsync(async (req: Request, res: Response) => {
+  const stats = await questionService.getQuestionStats();
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Question statistics retrieved successfully',
+    data: stats,
+  });
+});
+
+export const QuestionController = {
+  createQuestion,
+  getQuestionById,
+  updateQuestion,
+  deleteQuestion,
+  getUserQuestions,
+  getApprovedQuestions,
+  searchQuestions,
+  approveQuestion,
+  generateQuestion,
+  improveQuestion,
+  getQuestionsBySubject,
+  getQuestionsByTopic,
+  getQuestionStats,
+};

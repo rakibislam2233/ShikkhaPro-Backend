@@ -105,4 +105,7 @@ export const config = {
           'http://localhost:3001',
         ],
   },
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+  },
 };

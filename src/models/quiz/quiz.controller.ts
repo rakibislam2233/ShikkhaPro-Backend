@@ -1,0 +1,316 @@
+import { Request, Response } from 'express';
+import catchAsync from '../../shared/catchAsync';
+import { quizService } from './quiz.service';
+import sendResponse from '../../shared/sendResponse';
+import { IUser } from '../user/user.interface';
+import pick from '../../shared/pick';
+import { StatusCodes } from 'http-status-codes';
+
+const generateQuiz = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const quiz = await quizService.generateQuiz(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.CREATED,
+    message: 'Quiz generated successfully',
+    data: quiz,
+  });
+});
+
+const createQuiz = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const quiz = await quizService.createQuiz(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.CREATED,
+    message: 'Quiz created successfully',
+    data: quiz,
+  });
+});
+
+const getQuizById = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+
+  const quiz = await quizService.getQuizById(id, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz retrieved successfully',
+    data: quiz,
+  });
+});
+
+const updateQuiz = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const quiz = await quizService.updateQuiz(id, req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz updated successfully',
+    data: quiz,
+  });
+});
+
+const deleteQuiz = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  await quizService.deleteQuiz(id, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz deleted successfully',
+  });
+});
+
+const getUserQuizzes = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await quizService.getUserQuizzes(userId, options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'User quizzes retrieved successfully',
+    data: result,
+  });
+});
+
+const getPublicQuizzes = catchAsync(async (req: Request, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await quizService.getPublicQuizzes(options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Public quizzes retrieved successfully',
+    data: result,
+  });
+});
+
+const searchQuizzes = catchAsync(async (req: Request, res) => {
+  const filters = pick(req.query, [
+    'academicLevel',
+    'subject',
+    'difficulty',
+    'questionType',
+    'language',
+    'tags',
+    'dateRange',
+  ]);
+
+  // Parse array filters
+  if (filters.academicLevel && typeof filters.academicLevel === 'string') {
+    filters.academicLevel = filters.academicLevel.split(',');
+  }
+  if (filters.subject && typeof filters.subject === 'string') {
+    filters.subject = filters.subject.split(',');
+  }
+  if (filters.difficulty && typeof filters.difficulty === 'string') {
+    filters.difficulty = filters.difficulty.split(',');
+  }
+  if (filters.questionType && typeof filters.questionType === 'string') {
+    filters.questionType = filters.questionType.split(',');
+  }
+  if (filters.language && typeof filters.language === 'string') {
+    filters.language = filters.language.split(',');
+  }
+  if (filters.tags && typeof filters.tags === 'string') {
+    filters.tags = filters.tags.split(',');
+  }
+
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
+  const result = await quizService.searchQuizzes(filters, options);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quizzes retrieved successfully',
+    data: result,
+  });
+});
+
+const startQuizAttempt = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const attempt = await quizService.startQuizAttempt(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.CREATED,
+    message: 'Quiz attempt started successfully',
+    data: attempt,
+  });
+});
+
+const submitAnswer = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const attempt = await quizService.submitAnswer(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Answer submitted successfully',
+    data: attempt,
+  });
+});
+
+const saveAnswers = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const attempt = await quizService.saveAnswers(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Answers saved successfully',
+    data: attempt,
+  });
+});
+
+const completeQuizAttempt = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const result = await quizService.completeQuizAttempt(req.body, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz completed successfully',
+    data: result,
+  });
+});
+
+const getQuizResult = catchAsync(async (req, res) => {
+  const { attemptId } = req.params;
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const result = await quizService.getQuizResult(attemptId, userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz result retrieved successfully',
+    data: result,
+  });
+});
+
+const getUserStats = catchAsync(async (req, res) => {
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+
+  const stats = await quizService.getUserStats(userId);
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'User statistics retrieved successfully',
+    data: stats,
+  });
+});
+
+const getLeaderboard = catchAsync(async (req: Request, res) => {
+  const { quizId } = req.query;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const leaderboard = await quizService.getLeaderboard(
+    (quizId as string) || undefined,
+    limit
+  );
+
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Leaderboard retrieved successfully',
+    data: leaderboard,
+  });
+});
+
+export const QuizController = {
+  generateQuiz,
+  createQuiz,
+  getQuizById,
+  updateQuiz,
+  deleteQuiz,
+  getUserQuizzes,
+  getPublicQuizzes,
+  searchQuizzes,
+  startQuizAttempt,
+  submitAnswer,
+  saveAnswers,
+  completeQuizAttempt,
+  getQuizResult,
+  getUserStats,
+  getLeaderboard,
+};
