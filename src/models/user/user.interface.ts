@@ -3,10 +3,12 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
 // Profile interface
 export interface IProfile {
-  fullName: string;
+  fullName?: string;
   phone?: string;
-  avatar?: string;
   address?: string;
+  bio?: string;
+  organization?: string;
+  avatar?: string;
 }
 
 // Security interface

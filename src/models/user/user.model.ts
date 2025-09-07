@@ -19,6 +19,8 @@ const profileSchame = new Schema<IProfile>({
   phone: String,
   avatar: String,
   address: String,
+  bio: String,
+  organization: String,
 });
 
 const securitySchema = new Schema<ISecurity>({

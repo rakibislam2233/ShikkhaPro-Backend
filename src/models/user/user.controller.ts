@@ -66,19 +66,12 @@ const getMyProfile = catchAsync(async (req, res) => {
 
 const updateMyProfile = catchAsync(async (req, res) => {
   const { userId } = req.user;
-
-  // Initialize profile object if it doesn't exist
-  if (!req.body.profile) {
-    req.body.profile = {};
-  }
-
   // Handle file upload
   if (req.file) {
-    req.body.profile.avatar = `/${USER_UPLOAD_FOLDER}/${req.file.path}`;
+    console.log("REQUEST FILE", req.file);
+    req.body.avatar = `/${USER_UPLOAD_FOLDER}/${req.file.path}`;
   }
-
-  const updateData = req.body;
-
+  const updateData = req?.body;
   const user = await UserService.updateMyProfile(userId, updateData);
   sendResponse(res, {
     code: StatusCodes.OK,

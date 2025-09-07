@@ -209,15 +209,21 @@ const getMyProfile = async (userId: string): Promise<IUser | null> => {
 const updateMyProfile = async (
   userId: string,
   updateData: {
-    firstName?: string;
-    lastName?: string;
+    fullName?: string;
+    phone?: string;
+    address?: string;
+    bio?: string;
+    organization?: string;
     avatar?: string;
   }
 ): Promise<IUser | null> => {
   const updateQuery = {
     $set: {
-      'profile.firstName': updateData.firstName,
-      'profile.lastName': updateData.lastName,
+      'profile.fullName': updateData.fullName,
+      'profile.phone': updateData.phone,
+      'profile.address': updateData.address,
+      'profile.bio': updateData.bio,
+      'profile.organization': updateData.organization,
       'profile.avatar': updateData.avatar,
     },
   };
@@ -227,11 +233,9 @@ const updateMyProfile = async (
   }).select(
     '-password -__v -security -preferences -socialAccounts -profile._id -isResetPassword -metadata.ipAddresses -metadata.userAgent -metadata._id'
   );
-
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found.');
   }
-
   return user;
 };
 const deleteMyProfile = async (userId: string): Promise<IUser | null> => {
