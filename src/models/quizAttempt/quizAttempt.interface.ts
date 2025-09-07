@@ -86,10 +86,6 @@ export interface IQuizAttemptModel extends Model<IQuizAttemptDocument> {
   getLeaderboard(quizId?: string, limit?: number): Promise<any[]>;
 }
 
-export interface IStartQuizAttemptRequest {
-  quizId: string;
-}
-
 export interface ISubmitAnswerRequest {
   attemptId: string;
   questionId: string;
@@ -97,10 +93,6 @@ export interface ISubmitAnswerRequest {
 }
 
 export interface ISaveAnswerRequest {
-  attemptId: string;
+  quizId: string;
   answers: { [questionId: string]: string | string[] };
-}
-
-export interface ICompleteQuizAttemptRequest {
-  attemptId: string;
 }

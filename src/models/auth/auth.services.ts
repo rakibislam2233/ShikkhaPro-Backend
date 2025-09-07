@@ -16,7 +16,14 @@ const createUser = async (userData: IUser) => {
   if (existingUser) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'User already exists.');
   }
-  const user = await User.create(userData);
+  const newUserData: Partial<IUser> = {
+    email: userData.email,
+    password: userData.password,
+    profile: {
+      fullName: userData.profile.fullName,
+    },
+  };
+  const user = await User.create(newUserData);
   const tokens = await TokenService.accessAndRefreshToken(user);
   return tokens;
 };

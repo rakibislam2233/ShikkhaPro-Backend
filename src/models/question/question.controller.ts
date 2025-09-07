@@ -1,13 +1,13 @@
 import { Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../shared/catchAsync';
+import pick from '../../shared/pick';
 import sendResponse from '../../shared/sendResponse';
 import { UserRoles } from '../user/user.interface';
-import pick from '../../shared/pick';
 import { QuestionServices } from './question.service';
 
 const createQuestion = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -37,7 +37,7 @@ const getQuestionById = catchAsync(async (req: Request, res) => {
 
 const updateQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
   const isAdmin =
     req.user?.role === UserRoles.Admin ||
     req.user?.role === UserRoles.Super_Admin;
@@ -65,7 +65,7 @@ const updateQuestion = catchAsync(async (req, res) => {
 
 const deleteQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
   const isAdmin =
     req.user?.role === UserRoles.Admin ||
     req.user?.role === UserRoles.Super_Admin;
@@ -86,7 +86,7 @@ const deleteQuestion = catchAsync(async (req, res) => {
 });
 
 const getUserQuestions = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -190,7 +190,7 @@ const approveQuestion = catchAsync(async (req, res) => {
 });
 
 const generateQuestion = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -222,7 +222,7 @@ const generateQuestion = catchAsync(async (req, res) => {
 const improveQuestion = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { feedback } = req.body;
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {

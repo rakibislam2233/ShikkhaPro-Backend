@@ -3,20 +3,16 @@ import auth from '../../middlewares/auth';
 import validateRequest from '../../shared/validateRequest';
 import { QuizController } from './quiz.controller';
 import {
-  completeQuizAttemptValidation,
   createQuizValidation,
   deleteQuizValidation,
   generateQuizValidation,
   getQuizValidation,
-  saveAnswersValidation,
-  startQuizAttemptValidation,
   submitAnswerValidation,
+  submitQuizAnswerValidation,
   updateQuizValidation,
 } from './quiz.validation';
 
 const router = express.Router();
-
-
 
 // generate quiz for all authorized users
 router.post(
@@ -236,6 +232,7 @@ router.get('/my-quizzes', auth('User'), QuizController.getUserQuizzes);
  */
 router.get(
   '/:id',
+  auth('User'),
   validateRequest(getQuizValidation),
   QuizController.getQuizById
 );
@@ -254,47 +251,6 @@ router.delete(
   QuizController.deleteQuiz
 );
 
-/**
- * @swagger
- * /quiz/attempt/start:
- *   post:
- *     summary: Start a quiz attempt
- *     tags: [Quiz]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - quizId
- *             properties:
- *               quizId:
- *                 type: string
- *                 description: ID of the quiz to attempt
- *     responses:
- *       201:
- *         description: Quiz attempt started successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Quiz not found
- */
-// Quiz attempt management
-router.post(
-  '/attempt/start',
-  auth('User'),
-  validateRequest(startQuizAttemptValidation),
-  QuizController.startQuizAttempt
-);
 
 /**
  * @swagger
@@ -389,51 +345,12 @@ router.post(
  *         description: Attempt not found
  */
 router.post(
-  '/attempt/save',
+  '/attempt/submit-quiz-answer',
   auth('User'),
-  validateRequest(saveAnswersValidation),
-  QuizController.saveAnswers
+  validateRequest(submitQuizAnswerValidation),
+  QuizController.submitQuizAnswer
 );
 
-/**
- * @swagger
- * /quiz/attempt/complete:
- *   post:
- *     summary: Complete a quiz attempt
- *     tags: [Quiz]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - attemptId
- *             properties:
- *               attemptId:
- *                 type: string
- *     responses:
- *       200:
- *         description: Quiz completed successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Attempt not found
- */
-router.post(
-  '/attempt/complete',
-  auth('User'),
-  validateRequest(completeQuizAttemptValidation),
-  QuizController.completeQuizAttempt
-);
 
 /**
  * @swagger

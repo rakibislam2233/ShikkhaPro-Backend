@@ -146,11 +146,6 @@ export interface QuizSearchFilters {
   difficulty?: Difficulty;
   questionType?: QuestionType;
   language?: Language;
-  dateRange?: {
-    from: string;
-    to: string;
-  };
-  tags?: string;
 }
 
 export interface QuizLibrary {
@@ -174,6 +169,8 @@ export interface IQuizModel extends Model<IQuiz> {
   searchQuizzes(filters: QuizSearchFilters): Promise<IQuiz[]>;
 }
 
+
+// create quiz
 export interface IGenerateQuizRequest {
   academicLevel: AcademicLevel;
   subject: string;

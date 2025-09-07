@@ -10,14 +10,12 @@ import {
   IUpdateQuizRequest,
   QuizSearchFilters,
 } from './quiz.interface';
+
 import {
-  IQuizAttempt,
   IQuizAttemptDocument,
   IQuizResult,
-  IStartQuizAttemptRequest,
   ISubmitAnswerRequest,
   ISaveAnswerRequest,
-  ICompleteQuizAttemptRequest,
 } from '../quizAttempt/quizAttempt.interface';
 import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
@@ -149,7 +147,6 @@ const getUserQuizzes = async (
 ): Promise<IPaginateResult<IQuiz>> => {
   const query: any = { createdBy: filters.userId, isPublic: true };
 
-  console.log('FILTERS', query);
   if (filters.academicLevel) {
     query.academicLevel = { $in: filters.academicLevel };
   }
@@ -161,59 +158,12 @@ const getUserQuizzes = async (
   if (filters.difficulty && filters.difficulty.length > 0) {
     query.difficulty = { $in: filters.difficulty };
   }
-
-  if (filters.questionType && filters.questionType.length > 0) {
-    query['questions.type'] = { $in: filters.questionType };
-  }
-
   if (filters.language && filters.language.length > 0) {
     query.language = { $in: filters.language };
   }
-
-  if (filters.tags && filters.tags.length > 0) {
-    query.tags = { $in: filters.tags };
-  }
-
-  if (filters.dateRange) {
-    query.createdAt = {
-      ...(filters.dateRange.from && {
-        $gte: new Date(filters.dateRange.from),
-      }),
-      ...(filters.dateRange.to && { $lte: new Date(filters.dateRange.to) }),
-    };
-  }
-  options.populate = [{ path: 'createdBy', select: 'profile.fullName' }];
+  options.populate = [{ path: 'createdBy' }];
   options.sortBy = options.sortBy || 'createdAt';
   return await Quiz.paginate(query, options);
-};
-
-// start a new quiz attempt
-const startQuizAttempt = async (
-  request: IStartQuizAttemptRequest,
-  userId: string
-): Promise<IQuizAttemptDocument> => {
-  const quiz = await getQuizById(request.quizId, userId);
-
-  // Check if user already has an in-progress attempt for this quiz
-  const existingAttempt = await QuizAttempt.findOne({
-    quizId: request.quizId,
-    userId,
-    status: 'in-progress',
-  });
-
-  if (existingAttempt) {
-    return existingAttempt;
-  }
-
-  const attempt = new QuizAttempt({
-    quizId: request.quizId,
-    userId,
-    totalQuestions: quiz.questions.length,
-    timeLimit: quiz.timeLimit,
-    answers: new Map(),
-  });
-
-  return await attempt.save();
 };
 
 // submit an answer
@@ -257,71 +207,51 @@ const submitAnswer = async (
   return await attempt.save();
 };
 
-const saveAnswers = async (
+const submitQuizAnswer = async (
   request: ISaveAnswerRequest,
   userId: string
-): Promise<IQuizAttemptDocument> => {
-  const attempt = await QuizAttempt.findById(request.attemptId);
-
-  if (!attempt) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
-  }
-
-  if (attempt.userId.toString() !== userId) {
-    throw new ApiError(
-      StatusCodes.FORBIDDEN,
-      'You can only save answers for your own attempts'
-    );
-  }
-
-  if (attempt.status !== 'in-progress') {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Quiz attempt is not in progress'
-    );
-  }
-
-  // Update answers
-  Object.entries(request.answers).forEach(([questionId, answer]) => {
-    attempt.answers.set(questionId, answer);
-  });
-
-  return await attempt.save();
-};
-
-const completeQuizAttempt = async (
-  request: ICompleteQuizAttemptRequest,
-  userId: string
 ): Promise<IQuizResult> => {
-  const attempt = await QuizAttempt.findById(request.attemptId);
-
-  if (!attempt) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz attempt not found');
-  }
-
-  if (attempt.userId.toString() !== userId) {
-    throw new ApiError(
-      StatusCodes.FORBIDDEN,
-      'You can only complete your own attempts'
-    );
-  }
-
-  if (attempt.status !== 'in-progress') {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Quiz attempt is not in progress'
-    );
-  }
-
-  const quiz = await Quiz.findById(attempt.quizId);
+  const quiz = await getQuizById(request.quizId, userId);
   if (!quiz) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
   }
+  // Check if user already has an in-progress attempt for this quiz
+  const existingAttempt = await QuizAttempt.findOne({
+    quizId: request.quizId,
+    userId,
+    status: 'in-progress',
+  });
 
-  // Mark as completed
+  console.log('existingAttempt', existingAttempt);
+  if (existingAttempt) {
+    Object.entries(request.answers).forEach(([questionId, answer]) => {
+      existingAttempt.answers.set(questionId, answer);
+    });
+    existingAttempt.status = 'completed';
+    existingAttempt.isCompleted = true;
+    existingAttempt.completedAt = new Date();
+    await existingAttempt.save();
+
+    // Calculate score
+    await existingAttempt.calculateScore(quiz);
+
+    // Update quiz statistics
+    await updateQuizStats(quiz._id, existingAttempt.score!, quiz.totalPoints!);
+
+    return generateQuizResult(existingAttempt, quiz);
+  }
+
+  const attempt = new QuizAttempt({
+    quizId: request.quizId,
+    userId,
+    totalQuestions: quiz.questions.length,
+    timeLimit: quiz.timeLimit,
+    answers: request.answers,
+  });
   attempt.status = 'completed';
   attempt.isCompleted = true;
   attempt.completedAt = new Date();
+  await attempt.save();
 
   // Calculate score
   await attempt.calculateScore(quiz);
@@ -496,10 +426,8 @@ export const QuizServices = {
   updateQuiz,
   deleteQuiz,
   getUserQuizzes,
-  startQuizAttempt,
   submitAnswer,
-  saveAnswers,
-  completeQuizAttempt,
+  submitQuizAnswer,
   getQuizResult,
   generateQuiz,
   getUserStats,

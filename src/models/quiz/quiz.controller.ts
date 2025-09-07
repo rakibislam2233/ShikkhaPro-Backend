@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
-import catchAsync from '../../shared/catchAsync';
-import { QuizServices } from './quiz.service';
-import sendResponse from '../../shared/sendResponse';
-import pick from '../../shared/pick';
+import { Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import catchAsync from '../../shared/catchAsync';
+import pick from '../../shared/pick';
+import sendResponse from '../../shared/sendResponse';
+import { QuizServices } from './quiz.service';
 
 // generate quiz for all authorized users
 const generateQuiz = catchAsync(async (req, res) => {
@@ -25,7 +25,7 @@ const generateQuiz = catchAsync(async (req, res) => {
 
 // not implemented yet
 const createQuiz = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -46,6 +46,12 @@ const createQuiz = catchAsync(async (req, res) => {
 const getQuizById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
 
   const quiz = await QuizServices.getQuizById(id, userId);
 
@@ -80,7 +86,7 @@ const updateQuiz = catchAsync(async (req, res) => {
 // delete specific user single quiz
 const deleteQuiz = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -109,12 +115,14 @@ const getUserQuizzes = catchAsync(async (req, res) => {
   const filters = pick(req.query, [
     'subject',
     'topic',
+    'language',
     'difficulty',
     'academicLevel',
     'status',
   ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
   filters.userId = userId;
+
   const result = await QuizServices.getUserQuizzes(filters, options);
 
   sendResponse(res, {
@@ -124,27 +132,9 @@ const getUserQuizzes = catchAsync(async (req, res) => {
   });
 });
 
-const startQuizAttempt = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
-
-  if (!userId) {
-    return sendResponse(res, {
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'User authentication required',
-    });
-  }
-
-  const attempt = await QuizServices.startQuizAttempt(req.body, userId);
-
-  sendResponse(res, {
-    code: StatusCodes.CREATED,
-    message: 'Quiz attempt started successfully',
-    data: attempt,
-  });
-});
 
 const submitAnswer = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -162,8 +152,8 @@ const submitAnswer = catchAsync(async (req, res) => {
   });
 });
 
-const saveAnswers = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+const submitQuizAnswer = catchAsync(async (req, res) => {
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -172,7 +162,7 @@ const saveAnswers = catchAsync(async (req, res) => {
     });
   }
 
-  const attempt = await QuizServices.saveAnswers(req.body, userId);
+  const attempt = await QuizServices.submitQuizAnswer(req.body, userId);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -181,28 +171,9 @@ const saveAnswers = catchAsync(async (req, res) => {
   });
 });
 
-const completeQuizAttempt = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
-
-  if (!userId) {
-    return sendResponse(res, {
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'User authentication required',
-    });
-  }
-
-  const result = await QuizServices.completeQuizAttempt(req.body, userId);
-
-  sendResponse(res, {
-    code: StatusCodes.OK,
-    message: 'Quiz completed successfully',
-    data: result,
-  });
-});
-
 const getQuizResult = catchAsync(async (req, res) => {
   const { attemptId } = req.params;
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -221,7 +192,7 @@ const getQuizResult = catchAsync(async (req, res) => {
 });
 
 const getUserStats = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
+  const {userId} = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -262,10 +233,8 @@ export const QuizController = {
   updateQuiz,
   deleteQuiz,
   getUserQuizzes,
-  startQuizAttempt,
   submitAnswer,
-  saveAnswers,
-  completeQuizAttempt,
+  submitQuizAnswer,
   getQuizResult,
   getUserStats,
   getLeaderboard,

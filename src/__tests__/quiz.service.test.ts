@@ -3,8 +3,15 @@ import { Quiz } from '../models/quiz/quiz.model';
 import { ICreateQuizRequest } from '../models/quiz/quiz.interface';
 import mongoose from 'mongoose';
 
+// Mock the Quiz model
+jest.mock('../models/quiz/quiz.model');
+
 describe('QuizServices', () => {
   const mockUserId = new mongoose.Types.ObjectId().toString();
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('createQuiz', () => {
     it('should create a quiz successfully', async () => {
@@ -34,86 +41,83 @@ describe('QuizServices', () => {
         tags: ['math', 'algebra']
       };
 
+      const mockCreatedQuiz = { ...quizData, createdBy: mockUserId };
+      (Quiz.create as jest.Mock).mockResolvedValue(mockCreatedQuiz);
+
       const quiz = await QuizServices.createQuiz(quizData, mockUserId);
 
-      expect(quiz).toBeDefined();
-      expect(quiz.title).toBe(quizData.title);
-      expect(quiz.createdBy.toString()).toBe(mockUserId);
-      expect(quiz.questions).toHaveLength(1);
+      expect(Quiz.create).toHaveBeenCalledWith({ ...quizData, createdBy: mockUserId });
+      expect(quiz).toEqual(mockCreatedQuiz);
     });
   });
 
   describe('getQuizById', () => {
     it('should retrieve a public quiz', async () => {
-      const quiz = new Quiz({
+      const mockQuizId = new mongoose.Types.ObjectId().toString();
+      const mockQuiz = {
+        _id: mockQuizId,
         title: 'Public Quiz',
-        description: 'Test',
-        subject: 'Science',
-        academicLevel: 'bsc',
-        difficulty: 'easy',
-        language: 'english',
-        questions: [{
-          id: 'q1',
-          question: 'Test question?',
-          type: 'mcq',
-          options: ['A', 'B', 'C', 'D'],
-          correctAnswer: 'A',
-          points: 1,
-          explanation: 'Test explanation'
-        }],
         isPublic: true,
-        createdBy: new mongoose.Types.ObjectId(),
-        config: {
-          academicLevel: 'university',
-          subject: 'Science',
-          language: 'english',
-          questionType: 'mcq',
-          difficulty: 'easy',
-          questionCount: 1
-        }
+      };
+
+      (Quiz.findOne as jest.Mock).mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockQuiz),
       });
 
-      await quiz.save();
+      const retrievedQuiz = await QuizServices.getQuizById(mockQuizId);
 
-      const retrievedQuiz = await QuizServices.getQuizById(quiz._id.toString());
-      expect(retrievedQuiz).toBeDefined();
-      expect(retrievedQuiz.title).toBe('Public Quiz');
+      expect(Quiz.findOne).toHaveBeenCalledWith({ _id: mockQuizId, isPublic: true });
+      expect(retrievedQuiz).toEqual(mockQuiz);
+    });
+
+    it('should return null if quiz not found', async () => {
+        const mockQuizId = new mongoose.Types.ObjectId().toString();
+
+        (Quiz.findOne as jest.Mock).mockReturnValue({
+            select: jest.fn().mockResolvedValue(null),
+        });
+
+        const retrievedQuiz = await QuizServices.getQuizById(mockQuizId);
+
+        expect(Quiz.findOne).toHaveBeenCalledWith({ _id: mockQuizId, isPublic: true });
+        expect(retrievedQuiz).toBeNull();
     });
   });
 
   describe('updateQuiz', () => {
     it('should update a quiz when user is owner', async () => {
-      const userId = new mongoose.Types.ObjectId();
-      const quiz = new Quiz({
-        title: 'Original Title',
-        description: 'Original description',
-        subject: 'Math',
-        academicLevel: 'high-school',
-        difficulty: 'easy',
-        language: 'english',
-        questions: [],
-        isPublic: true,
-        createdBy: userId,
-        config: {
-          academicLevel: 'high-school',
-          subject: 'Math',
-          language: 'english',
-          questionType: 'mcq',
-          difficulty: 'easy',
-          questionCount: 0
-        }
-      });
+        const mockQuizId = new mongoose.Types.ObjectId().toString();
+        const updateData = { title: 'Updated Title' };
+        const mockUpdatedQuiz = { _id: mockQuizId, ...updateData };
 
-      await quiz.save();
+        (Quiz.findOneAndUpdate as jest.Mock).mockResolvedValue(mockUpdatedQuiz);
 
-      const updateData = { title: 'Updated Title' };
-      const updatedQuiz = await QuizServices.updateQuiz(
-        quiz._id.toString(),
-        updateData,
-        userId.toString()
-      );
+        const updatedQuiz = await QuizServices.updateQuiz(
+            mockQuizId,
+            updateData,
+            mockUserId
+        );
 
-      expect(updatedQuiz.title).toBe('Updated Title');
+        expect(Quiz.findOneAndUpdate).toHaveBeenCalledWith(
+            { _id: mockQuizId, createdBy: mockUserId },
+            { $set: updateData },
+            { new: true, runValidators: true, select: '-__v' }
+        );
+        expect(updatedQuiz).toEqual(mockUpdatedQuiz);
+    });
+
+    it('should throw an error if user is not owner', async () => {
+        const mockQuizId = new mongoose.Types.ObjectId().toString();
+        const updateData = { title: 'Updated Title' };
+        const anotherUserId = new mongoose.Types.ObjectId().toString();
+
+        (Quiz.findOneAndUpdate as jest.Mock).mockResolvedValue(null);
+
+        await expect(QuizServices.updateQuiz(
+            mockQuizId,
+            updateData,
+            anotherUserId
+        )).rejects.toThrow('Quiz not found or you are not the owner');
     });
   });
 });

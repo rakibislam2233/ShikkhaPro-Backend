@@ -110,9 +110,9 @@ export const submitAnswerValidation = z.object({
   }),
 });
 
-export const saveAnswersValidation = z.object({
+export const submitQuizAnswerValidation = z.object({
   body: z.object({
-    attemptId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid attempt ID'),
+    quizId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid quiz ID'),
     answers: z.record(z.union([z.string(), z.array(z.string())])),
   }),
 });

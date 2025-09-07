@@ -5,7 +5,6 @@ import {
   IQuizModel,
   Question,
   QuizConfig,
-  QuizSearchFilters,
 } from './quiz.interface';
 
 const questionSchema = new Schema<Question>({
@@ -62,6 +61,62 @@ const questionSchema = new Schema<Question>({
   },
   category: String,
   tags: [String],
+});
+
+const quizConfigSchema = new Schema<QuizConfig>({
+  academicLevel: {
+    type: String,
+    enum: [
+      'class-1',
+      'class-2',
+      'class-3',
+      'class-4',
+      'class-5',
+      'class-6',
+      'class-7',
+      'jsc',
+      'ssc',
+      'hsc',
+      'bsc',
+      'msc',
+    ],
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  topic: {
+    type: String,
+    trim: true,
+  },
+  language: {
+    type: String,
+    enum: ['english', 'bengali', 'hindi'],
+    required: true,
+  },
+  questionType: {
+    type: String,
+    enum: ['mcq', 'short-answer', 'true-false', 'multiple-select', 'mixed'],
+    required: true,
+  },
+  difficulty: {
+    type: String,
+    enum: ['easy', 'medium', 'hard'],
+    required: true,
+  },
+  questionCount: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 100,
+  },
+  timeLimit: {
+    type: Number,
+    min: 1,
+  },
+  instructions: String,
 });
 
 const quizSchema = new Schema<IQuiz, IQuizModel>(
@@ -149,6 +204,7 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     tags: {
       type: [String],
       default: [],
+      index: true,
     },
     estimatedTime: {
       type: Number,
@@ -163,6 +219,7 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       trim: true,
       maxlength: 2000,
     },
+    config: quizConfigSchema,
     attempts: {
       type: Number,
       default: 0,
@@ -247,43 +304,6 @@ quizSchema.statics.getPublicQuizzes = async function () {
   return await this.find({ isPublic: true, status: 'published' }).sort({
     createdAt: -1,
   });
-};
-
-quizSchema.statics.searchQuizzes = async function (filters: QuizSearchFilters) {
-  const query: any = { status: 'published', isPublic: true };
-
-  if (filters.academicLevel && filters.academicLevel.length > 0) {
-    query.academicLevel = { $in: filters.academicLevel };
-  }
-
-  if (filters.subject && filters.subject.length > 0) {
-    query.subject = { $in: filters.subject };
-  }
-
-  if (filters.difficulty && filters.difficulty.length > 0) {
-    query.difficulty = { $in: filters.difficulty };
-  }
-
-  if (filters.questionType && filters.questionType.length > 0) {
-    query['questions.type'] = { $in: filters.questionType };
-  }
-
-  if (filters.language && filters.language.length > 0) {
-    query.language = { $in: filters.language };
-  }
-
-  if (filters.tags && filters.tags.length > 0) {
-    query.tags = { $in: filters.tags };
-  }
-
-  if (filters.dateRange) {
-    query.createdAt = {
-      ...(filters.dateRange.from && { $gte: new Date(filters.dateRange.from) }),
-      ...(filters.dateRange.to && { $lte: new Date(filters.dateRange.to) }),
-    };
-  }
-
-  return await this.find(query).sort({ createdAt: -1 });
 };
 
 export const Quiz = model<IQuiz, IQuizModel>('Quiz', quizSchema);
