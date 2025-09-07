@@ -88,8 +88,15 @@ const verifyOTP = async (userEmail: string, otp: string, type: string) => {
     await otpDoc.save();
     throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid OTP.');
   }
-
   otpDoc.verified = true;
+  // remove expired or verified OTPs
+  await OTP.deleteMany({
+    userEmail: userEmail,
+    expiresAt: {
+      $lt: new Date(),
+    },
+    verified: true,
+  });
   await otpDoc.save();
   return true;
 };

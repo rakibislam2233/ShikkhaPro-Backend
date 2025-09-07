@@ -83,16 +83,7 @@ const resetPassword = async (email: string, password: string) => {
   user.password = password;
   user.isResetPassword = false;
   await user.save();
-  return {
-    id: user._id,
-    role: user.role,
-    email: user.email,
-    profile: {
-      fullName: user.profile.fullName,
-      phone: user.profile.phone,
-      address: user.profile.address,
-    },
-  };
+  return null;
 };
 
 const changePassword = async (

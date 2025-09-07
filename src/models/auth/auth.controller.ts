@@ -174,8 +174,7 @@ const changePassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  const { email } = req.user;
-  const { newPassword } = req.body;
+  const { email, newPassword } = req.body;
   const result = await AuthService.resetPassword(email, newPassword);
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -186,7 +185,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const logout = catchAsync(async (req, res) => {
   //get refresh token from cookies
-  const refreshToken = req.cookies.refreshToken;
+  const { refreshToken } = req.body;
   if (!refreshToken) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Refresh token is required.');
   }
@@ -199,7 +198,7 @@ const logout = catchAsync(async (req, res) => {
 });
 
 const refreshToken = catchAsync(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+  const { refreshToken } = req.body;
   if (!refreshToken) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Refresh token is required.');
   }
