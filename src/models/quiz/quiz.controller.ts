@@ -116,57 +116,6 @@ const getUserQuizzes = catchAsync(async (req, res) => {
   });
 });
 
-const getPublicQuizzes = catchAsync(async (req: Request, res) => {
-  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await QuizServices.getPublicQuizzes(options);
-
-  sendResponse(res, {
-    code: StatusCodes.OK,
-    message: 'Public quizzes retrieved successfully',
-    data: result,
-  });
-});
-
-const searchQuizzes = catchAsync(async (req: Request, res) => {
-  const filters = pick(req.query, [
-    'academicLevel',
-    'subject',
-    'difficulty',
-    'questionType',
-    'language',
-    'tags',
-    'dateRange',
-  ]);
-
-  // Parse array filters
-  if (filters.academicLevel && typeof filters.academicLevel === 'string') {
-    filters.academicLevel = filters.academicLevel.split(',');
-  }
-  if (filters.subject && typeof filters.subject === 'string') {
-    filters.subject = filters.subject.split(',');
-  }
-  if (filters.difficulty && typeof filters.difficulty === 'string') {
-    filters.difficulty = filters.difficulty.split(',');
-  }
-  if (filters.questionType && typeof filters.questionType === 'string') {
-    filters.questionType = filters.questionType.split(',');
-  }
-  if (filters.language && typeof filters.language === 'string') {
-    filters.language = filters.language.split(',');
-  }
-  if (filters.tags && typeof filters.tags === 'string') {
-    filters.tags = filters.tags.split(',');
-  }
-
-  const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await QuizServices.searchQuizzes(filters, options);
-
-  sendResponse(res, {
-    code: StatusCodes.OK,
-    message: 'Quizzes retrieved successfully',
-    data: result,
-  });
-});
 
 const startQuizAttempt = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
@@ -306,8 +255,6 @@ export const QuizController = {
   updateQuiz,
   deleteQuiz,
   getUserQuizzes,
-  getPublicQuizzes,
-  searchQuizzes,
   startQuizAttempt,
   submitAnswer,
   saveAnswers,

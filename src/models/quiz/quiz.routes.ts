@@ -39,14 +39,6 @@ router.post(
 // get my all quizzes
 router.get('/my-quizzes', auth("User"), QuizController.getUserQuizzes);
 
-router.get('/public', QuizController.getPublicQuizzes);
-
-router.get(
-  '/search',
-  validateRequest(searchQuizzesValidation),
-  QuizController.searchQuizzes
-);
-
 router.get(
   '/:id',
   validateRequest(getQuizValidation),

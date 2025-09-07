@@ -22,7 +22,7 @@ import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
 // Generate quiz
- const generateQuiz = async (
+const generateQuiz = async (
   request: IGenerateQuizRequest,
   userId: string
 ): Promise<IQuiz> => {
@@ -55,7 +55,7 @@ const determineQuestionType = (questions: any[]): any => {
 };
 
 // save the quize for backend
- const createQuiz = async (
+const createQuiz = async (
   quizData: ICreateQuizRequest,
   userId: string
 ): Promise<IQuiz> => {
@@ -78,28 +78,28 @@ const determineQuestionType = (questions: any[]): any => {
   return await quiz.save();
 };
 
- const getQuizById = async (
-  quizId: string,
-  userId?: string
-): Promise<IQuiz> => {
+// get specific user single quiz
+const getQuizById = async (quizId: string, userId?: string): Promise<IQuiz> => {
   const quiz = await Quiz.findById(quizId).populate(
     'createdBy',
     'profile.fullName email'
   );
-
   if (!quiz) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
   }
-
   // Check if user has access to this quiz
-  if (!quiz.isPublic && (!userId || quiz.createdBy._id.toString() !== userId)) {
+  if (
+    !quiz.isPublic &&
+    (!userId || quiz?.createdBy?._id.toString() !== userId)
+  ) {
     throw new ApiError(StatusCodes.FORBIDDEN, 'Access denied to this quiz');
   }
 
   return quiz;
 };
 
- const updateQuiz = async (
+// update specific user single quiz
+const updateQuiz = async (
   quizId: string,
   updateData: IUpdateQuizRequest,
   userId: string
@@ -118,22 +118,11 @@ const determineQuestionType = (questions: any[]): any => {
   }
 
   Object.assign(quiz, updateData);
-
-  if (updateData.questions) {
-    quiz.config = {
-      ...quiz.config,
-      questionType: determineQuestionType(updateData.questions),
-      questionCount: updateData.questions.length,
-    };
-  }
-
   return await quiz.save();
 };
 
- const deleteQuiz = async (
-  quizId: string,
-  userId: string
-): Promise<void> => {
+// delete specific user single quiz
+const deleteQuiz = async (quizId: string, userId: string): Promise<void> => {
   const quiz = await Quiz.findById(quizId);
 
   if (!quiz) {
@@ -152,29 +141,12 @@ const determineQuestionType = (questions: any[]): any => {
   await quiz.save();
 };
 
- const getUserQuizzes = async (
-  userId: string,
-  options: IPaginateOptions
-): Promise<IPaginateResult<IQuiz>> => {
-  const filter = { createdBy: userId };
-  options.sortBy = options.sortBy || 'createdAt';
-  return await Quiz.paginate(filter, options);
-};
-
- const getPublicQuizzes = async (
-  options: IPaginateOptions
-): Promise<IPaginateResult<IQuiz>> => {
-  const filter = { isPublic: true, status: 'published' };
-  options.populate = [{ path: 'createdBy', select: 'profile.fullName' }];
-  options.sortBy = options.sortBy || 'createdAt';
-  return await Quiz.paginate(filter, options);
-};
-
- const searchQuizzes = async (
+// get all user quizzes
+const getUserQuizzes = async (
   filters: QuizSearchFilters,
   options: IPaginateOptions
 ): Promise<IPaginateResult<IQuiz>> => {
-  const query: any = { isPublic: true, status: 'published' };
+  const query: any = { createdBy: filters.userId, isPublic: true };
 
   if (filters.academicLevel && filters.academicLevel.length > 0) {
     query.academicLevel = { $in: filters.academicLevel };
@@ -213,7 +185,8 @@ const determineQuestionType = (questions: any[]): any => {
   return await Quiz.paginate(query, options);
 };
 
- const startQuizAttempt = async (
+// start a new quiz attempt
+const startQuizAttempt = async (
   request: IStartQuizAttemptRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -241,7 +214,8 @@ const determineQuestionType = (questions: any[]): any => {
   return await attempt.save();
 };
 
- const submitAnswer = async (
+// submit an answer
+const submitAnswer = async (
   request: ISubmitAnswerRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -281,7 +255,7 @@ const determineQuestionType = (questions: any[]): any => {
   return await attempt.save();
 };
 
- const saveAnswers = async (
+const saveAnswers = async (
   request: ISaveAnswerRequest,
   userId: string
 ): Promise<IQuizAttempt> => {
@@ -313,7 +287,7 @@ const determineQuestionType = (questions: any[]): any => {
   return await attempt.save();
 };
 
- const completeQuizAttempt = async (
+const completeQuizAttempt = async (
   request: ICompleteQuizAttemptRequest,
   userId: string
 ): Promise<IQuizResult> => {
@@ -356,7 +330,7 @@ const determineQuestionType = (questions: any[]): any => {
   return generateQuizResult(attempt, quiz);
 };
 
- const getQuizResult = async (
+const getQuizResult = async (
   attemptId: string,
   userId: string
 ): Promise<IQuizResult> => {
@@ -388,11 +362,11 @@ const determineQuestionType = (questions: any[]): any => {
   return generateQuizResult(attempt, quiz);
 };
 
- const getUserStats = async (userId: string): Promise<any> => {
+const getUserStats = async (userId: string): Promise<any> => {
   return await QuizAttempt.getUserStats(userId);
 };
 
- const getLeaderboard = async (
+const getLeaderboard = async (
   quizId?: string,
   limit: number = 10
 ): Promise<any[]> => {
@@ -520,8 +494,6 @@ export const QuizServices = {
   updateQuiz,
   deleteQuiz,
   getUserQuizzes,
-  getPublicQuizzes,
-  searchQuizzes,
   startQuizAttempt,
   submitAnswer,
   saveAnswers,

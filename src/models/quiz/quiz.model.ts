@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { model, Schema } from 'mongoose';
 import paginate from '../../common/plugins/paginate';
 import {
   IQuiz,
@@ -62,62 +62,6 @@ const questionSchema = new Schema<Question>({
   },
   category: String,
   tags: [String],
-});
-
-const quizConfigSchema = new Schema<QuizConfig>({
-  academicLevel: {
-    type: String,
-    enum: [
-      'class-1',
-      'class-2',
-      'class-3',
-      'class-4',
-      'class-5',
-      'class-6',
-      'class-7',
-      'jsc',
-      'ssc',
-      'hsc',
-      'bsc',
-      'msc',
-    ],
-    required: true,
-  },
-  subject: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  topic: {
-    type: String,
-    trim: true,
-  },
-  language: {
-    type: String,
-    enum: ['english', 'bengali', 'hindi'],
-    required: true,
-  },
-  questionType: {
-    type: String,
-    enum: ['mcq', 'short-answer', 'true-false', 'multiple-select', 'mixed'],
-    required: true,
-  },
-  difficulty: {
-    type: String,
-    enum: ['easy', 'medium', 'hard'],
-    required: true,
-  },
-  questionCount: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 100,
-  },
-  timeLimit: {
-    type: Number,
-    min: 1,
-  },
-  instructions: String,
 });
 
 const quizSchema = new Schema<IQuiz, IQuizModel>(
@@ -220,7 +164,6 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       trim: true,
       maxlength: 2000,
     },
-    config: quizConfigSchema,
     attempts: {
       type: Number,
       default: 0,
@@ -254,15 +197,6 @@ quizSchema.index({ tags: 1 });
 quizSchema.index({ createdAt: -1 });
 quizSchema.index({ attempts: -1 });
 quizSchema.index({ averageScore: -1 });
-
-// quizSchema.index({
-//   title: 'text',
-//   description: 'text',
-//   subject: 'text',
-//   topic: 'text',
-//   tags: 'text',
-// });
-
 quizSchema.index(
   {
     title: 'text',
@@ -353,4 +287,4 @@ quizSchema.statics.searchQuizzes = async function (filters: QuizSearchFilters) {
   return await this.find(query).sort({ createdAt: -1 });
 };
 
-export const Quiz = mongoose.model<IQuiz, IQuizModel>('Quiz', quizSchema);
+export const Quiz = model<IQuiz, IQuizModel>('Quiz', quizSchema);

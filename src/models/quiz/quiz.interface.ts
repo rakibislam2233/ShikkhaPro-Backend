@@ -1,10 +1,26 @@
 import mongoose, { Model } from 'mongoose';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
-export type AcademicLevel = 'class-1' | 'class-2' | 'class-3' | 'class-4' | 'class-5' | 
-  'class-6' | 'class-7' | 'jsc' | 'ssc' | 'hsc' | 'bsc' | 'msc';
+export type AcademicLevel =
+  | 'class-1'
+  | 'class-2'
+  | 'class-3'
+  | 'class-4'
+  | 'class-5'
+  | 'class-6'
+  | 'class-7'
+  | 'jsc'
+  | 'ssc'
+  | 'hsc'
+  | 'bsc'
+  | 'msc';
 
-export type QuestionType = 'mcq' | 'short-answer' | 'true-false' | 'multiple-select' | 'mixed';
+export type QuestionType =
+  | 'mcq'
+  | 'short-answer'
+  | 'true-false'
+  | 'multiple-select'
+  | 'mixed';
 
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
 export type Difficulty = QuizDifficulty;
@@ -28,9 +44,9 @@ export interface Question {
   id: string;
   question: string;
   type: QuestionType;
-  options?: string[]; 
+  options?: string[];
   correctAnswer: string | string[];
-  correct_answer?: string; 
+  correct_answer?: string;
   explanation: string;
   difficulty: Difficulty;
   points: number;
@@ -74,7 +90,7 @@ export interface QuizAttempt {
   totalScore?: number;
   totalQuestions: number;
   correctAnswers: number;
-  timeSpent?: number; 
+  timeSpent?: number;
   isCompleted: boolean;
   flaggedQuestions: string[];
 }
@@ -124,6 +140,7 @@ export interface Achievement {
 }
 
 export interface QuizSearchFilters {
+  userId?: string;
   academicLevel?: AcademicLevel[];
   subject?: string[];
   difficulty?: Difficulty[];
