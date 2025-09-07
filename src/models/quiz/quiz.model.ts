@@ -199,7 +199,7 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     },
     isPublic: {
       type: Boolean,
-      default: false,
+      default: true,
       index: true,
     },
     tags: {

@@ -20,14 +20,14 @@ import {
 } from '../quizAttempt/quizAttempt.interface';
 import ApiError from '../../errors/AppErro';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
+
+// Generate quiz
  const generateQuiz = async (
   request: IGenerateQuizRequest,
   userId: string
 ): Promise<IQuiz> => {
   try {
     const generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
-    console.log("Generated questions:", generatedQuestions);
-
     const quizData: ICreateQuizRequest = {
       title: `${request.subject} - ${request.topic} Quiz`,
       description: `A ${request.difficulty} level quiz on ${request?.topic} for ${request.academicLevel}`,
@@ -45,7 +45,6 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
     return await createQuiz(quizData, userId);
   } catch (error) {
-    console.log("Error generating quiz:", error);
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to generate quiz');
   }
 };
@@ -55,6 +54,7 @@ const determineQuestionType = (questions: any[]): any => {
   return types.length === 1 ? types[0] : 'mixed';
 };
 
+// save the quize for backend
  const createQuiz = async (
   quizData: ICreateQuizRequest,
   userId: string

@@ -1,4 +1,4 @@
-# 📚 Exam QA Generator Backend
+# 📚 ShikkhaPro Backend - AI-Powered Quiz Generator 
 
 A comprehensive backend API for an intelligent exam question and answer generator built with Node.js, Express, TypeScript, MongoDB, and OpenAI integration.
 

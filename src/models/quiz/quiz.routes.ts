@@ -17,7 +17,9 @@ import {
 
 const router = express.Router();
 
-// Quiz generation and management
+
+
+// generate quiz for all authorized users
 router.post(
   '/generate',
   auth('User'),
@@ -25,6 +27,8 @@ router.post(
   QuizController.generateQuiz
 );
 
+
+// create specific quize as teacher or student (not implemented yet)
 router.post(
   '/',
   auth("User"),
@@ -32,6 +36,7 @@ router.post(
   QuizController.createQuiz
 );
 
+// get my all quizzes
 router.get('/my-quizzes', auth("User"), QuizController.getUserQuizzes);
 
 router.get('/public', QuizController.getPublicQuizzes);

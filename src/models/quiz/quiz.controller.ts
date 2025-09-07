@@ -5,6 +5,7 @@ import sendResponse from '../../shared/sendResponse';
 import pick from '../../shared/pick';
 import { StatusCodes } from 'http-status-codes';
 
+// generate quiz for all authorized users
 const generateQuiz = catchAsync(async (req, res) => {
   const { userId } = req.user;
   if (!userId) {
@@ -13,7 +14,6 @@ const generateQuiz = catchAsync(async (req, res) => {
       message: 'User authentication required',
     });
   }
-
   const quiz = await QuizServices.generateQuiz(req.body, userId);
 
   sendResponse(res, {
@@ -23,6 +23,7 @@ const generateQuiz = catchAsync(async (req, res) => {
   });
 });
 
+// not implemented yet
 const createQuiz = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();
   if (!userId) {
@@ -41,9 +42,10 @@ const createQuiz = catchAsync(async (req, res) => {
   });
 });
 
+// get specific user single quiz
 const getQuizById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id?.toString();
+  const { userId } = req.user;
 
   const quiz = await QuizServices.getQuizById(id, userId);
 
@@ -54,9 +56,10 @@ const getQuizById = catchAsync(async (req, res) => {
   });
 });
 
+// update specific user single quiz
 const updateQuiz = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id?.toString();
+  const { userId } = req.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -74,6 +77,7 @@ const updateQuiz = catchAsync(async (req, res) => {
   });
 });
 
+// delete specific user single quiz
 const deleteQuiz = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?._id?.toString();
@@ -93,16 +97,15 @@ const deleteQuiz = catchAsync(async (req, res) => {
   });
 });
 
+// get all user quizzes
 const getUserQuizzes = catchAsync(async (req, res) => {
-  const userId = req.user?._id?.toString();
-
+  const { userId } = req.user;
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
       message: 'User authentication required',
     });
   }
-
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
   const result = await QuizServices.getUserQuizzes(userId, options);
 
