@@ -149,7 +149,8 @@ const getUserQuizzes = async (
 ): Promise<IPaginateResult<IQuiz>> => {
   const query: any = { createdBy: filters.userId, isPublic: true };
 
-  if (filters.academicLevel && filters.academicLevel.length > 0) {
+  console.log('FILTERS', query);
+  if (filters.academicLevel) {
     query.academicLevel = { $in: filters.academicLevel };
   }
 

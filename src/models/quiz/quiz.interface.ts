@@ -141,16 +141,16 @@ export interface Achievement {
 
 export interface QuizSearchFilters {
   userId?: string;
-  academicLevel?: AcademicLevel[];
-  subject?: string[];
-  difficulty?: Difficulty[];
-  questionType?: QuestionType[];
-  language?: Language[];
+  academicLevel?: string;
+  subject?: string;
+  difficulty?: Difficulty;
+  questionType?: QuestionType;
+  language?: Language;
   dateRange?: {
     from: string;
     to: string;
   };
-  tags?: string[];
+  tags?: string;
 }
 
 export interface QuizLibrary {

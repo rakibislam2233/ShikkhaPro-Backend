@@ -5,7 +5,6 @@ import app from './app';
 import { errorLogger, logger } from './shared/logger';
 import { config } from './config';
 import { socketHelper } from './socket/socket';
-import { startLogCleanupScheduler } from './scripts/cleanupLogs';
 
 // Type for server instance
 let server: any;
@@ -27,8 +26,6 @@ const connectToDatabase = async (): Promise<void> => {
       socketTimeoutMS: 45000,
       family: 4,
     });
-    
-    console.log('🚀 Database connected successfully');
     logger.info('🚀 Database connected successfully');
     
     // Set up mongoose connection event listeners
@@ -57,7 +54,6 @@ const startServer = (): void => {
   const port = typeof config.port === 'number' ? config.port : Number(config.port);
   
   server = app.listen(port, config.backend.ip as string, () => {
-    console.log(`♻️  Application listening on port ${config.backend.baseUrl}/test`);
     logger.info(`♻️  Application listening on port ${config.backend.baseUrl}/test`);
   });
 
@@ -142,10 +138,6 @@ async function main() {
     
     // Setup Socket.IO
     setupSocketIO();
-    
-    // Start automatic log cleanup scheduler
-    startLogCleanupScheduler();
-    
     logger.info('🚀 Application started successfully');
     
   } catch (error) {

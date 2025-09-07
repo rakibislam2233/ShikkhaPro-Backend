@@ -49,20 +49,7 @@ const router = express.Router();
  *                 example: "Algebra"
  *               academicLevel:
  *                 type: string
- *                 enum: [
-        'class-1',
-        'class-2',
-        'class-3',
-        'class-4',
-        'class-5',
-        'class-6',
-        'class-7',
-        'jsc',
-        'ssc',
-        'hsc',
-        'bsc',
-        'msc',
-      ]
+ *                 enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc']
  *               difficulty:
  *                 type: string
  *                 enum: [easy, medium, hard]
@@ -74,7 +61,7 @@ const router = express.Router();
  *                 type: array
  *                 items:
  *                   type: string
- *                   enum: [mcq, true-false, short-answer, essay]
+ *                   enum: ['mcq', 'true-false', 'short-answer', 'essay']
  *     responses:
  *       201:
  *         description: Questions generated successfully
@@ -107,7 +94,7 @@ router.post(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/QuestionCreation'
+ *             $ref: '#/components/schemas/Question'
  *     responses:
  *       201:
  *         description: Question created successfully
@@ -159,7 +146,7 @@ router.post(
  *         name: difficulty
  *         schema:
  *           type: string
- *           enum: [easy, medium, hard]
+ *           enum: ['easy', 'medium', 'hard']
  *     responses:
  *       200:
  *         description: User questions retrieved successfully
@@ -201,7 +188,7 @@ router.get(
  *         name: difficulty
  *         schema:
  *           type: string
- *           enum: [easy, medium, hard]
+ *           enum: ['easy', 'medium', 'hard']
  *     responses:
  *       200:
  *         description: Approved questions retrieved successfully
@@ -240,7 +227,7 @@ router.get(
  *         name: difficulty
  *         schema:
  *           type: string
- *           enum: [easy, medium, hard]
+ *           enum: ['easy', 'medium', 'hard']
  *       - in: query
  *         name: page
  *         schema:
@@ -413,7 +400,7 @@ router.get(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/QuestionCreation'
+ *             $ref: '#/components/schemas/Question'
  *     responses:
  *       200:
  *         description: Question updated successfully
@@ -493,7 +480,7 @@ router.delete(
  *             properties:
  *               improvementType:
  *                 type: string
- *                 enum: [clarity, difficulty, options, explanation]
+ *                 enum: ['clarity', 'difficulty', 'options', 'explanation']
  *                 description: Type of improvement to apply
  *               instructions:
  *                 type: string

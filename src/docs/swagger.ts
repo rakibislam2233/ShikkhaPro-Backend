@@ -94,7 +94,7 @@ const options: swaggerJSDoc.Options = {
         // Quiz Related Schemas
         Quiz: {
           type: 'object',
-          required: ['title', 'description', 'subject', 'academicLevel', 'difficulty', 'questions'],
+          required: ['title', 'subject', 'academicLevel', 'difficulty', 'language', 'questions'],
           properties: {
             _id: {
               type: 'string',
@@ -204,12 +204,11 @@ const options: swaggerJSDoc.Options = {
         // Question Schema
         Question: {
           type: 'object',
-          required: ['id', 'question', 'type', 'correctAnswer', 'points', 'difficulty'],
+          required: ['question', 'type', 'correctAnswer', 'points', 'difficulty', 'subject', 'academicLevel', 'language'],
           properties: {
-            id: {
+            _id: {
               type: 'string',
               description: 'Question ID',
-              example: 'q1',
             },
             question: {
               type: 'string',
@@ -238,6 +237,11 @@ const options: swaggerJSDoc.Options = {
               description: 'Correct answer(s)',
               example: '4',
             },
+            explanation: {
+              type: 'string',
+              description: 'Explanation of the correct answer',
+              example: '2 + 2 equals 4 in basic arithmetic',
+            },
             points: {
               type: 'number',
               description: 'Points awarded for correct answer',
@@ -248,11 +252,6 @@ const options: swaggerJSDoc.Options = {
               enum: ['easy', 'medium', 'hard'],
               description: 'Question difficulty',
               example: 'easy',
-            },
-            explanation: {
-              type: 'string',
-              description: 'Explanation of the correct answer',
-              example: '2 + 2 equals 4 in basic arithmetic',
             },
             subject: {
               type: 'string',
@@ -519,10 +518,6 @@ const options: swaggerJSDoc.Options = {
         ApiResponse: {
           type: 'object',
           properties: {
-            success: {
-              type: 'boolean',
-              example: true,
-            },
             code: {
               type: 'number',
               example: 200,
@@ -535,37 +530,12 @@ const options: swaggerJSDoc.Options = {
               type: 'object',
               description: 'Response data',
             },
-            meta: {
-              type: 'object',
-              properties: {
-                page: {
-                  type: 'number',
-                  example: 1,
-                },
-                limit: {
-                  type: 'number',
-                  example: 10,
-                },
-                total: {
-                  type: 'number',
-                  example: 100,
-                },
-                totalPages: {
-                  type: 'number',
-                  example: 10,
-                },
-              },
-            },
           },
         },
 
         ApiError: {
           type: 'object',
           properties: {
-            success: {
-              type: 'boolean',
-              default: false,
-            },
             code: {
               type: 'number',
               example: 400,
@@ -574,9 +544,19 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               example: 'Error message',
             },
-            stack: {
-              type: 'string',
-              description: 'Error stack trace (development only)',
+            error: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  path: {
+                    type: 'string',
+                  },
+                  message: {
+                    type: 'string',
+                  },
+                },
+              },
             },
           },
         },

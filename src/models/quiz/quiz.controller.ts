@@ -106,8 +106,16 @@ const getUserQuizzes = catchAsync(async (req, res) => {
       message: 'User authentication required',
     });
   }
+  const filters = pick(req.query, [
+    'subject',
+    'topic',
+    'difficulty',
+    'academicLevel',
+    'status',
+  ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);
-  const result = await QuizServices.getUserQuizzes(userId, options);
+  filters.userId = userId;
+  const result = await QuizServices.getUserQuizzes(filters, options);
 
   sendResponse(res, {
     code: StatusCodes.OK,
@@ -115,7 +123,6 @@ const getUserQuizzes = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
 
 const startQuizAttempt = catchAsync(async (req, res) => {
   const userId = req.user?._id?.toString();

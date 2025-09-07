@@ -27,7 +27,7 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UserRegistration'
+ *             $ref: '#/components/schemas/RegisterRequest'
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -40,7 +40,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/register',
@@ -83,7 +83,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/verify-otp',
@@ -115,7 +115,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/login',
@@ -153,7 +153,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/resend-otp',
@@ -190,7 +190,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/forgot-password',
@@ -231,7 +231,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/reset-password',
@@ -268,7 +268,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ApiError'
  */
 router.post(
   '/refresh-token',

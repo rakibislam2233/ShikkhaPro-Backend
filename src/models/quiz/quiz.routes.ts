@@ -16,86 +16,7 @@ import {
 
 const router = express.Router();
 
-/**
- * @swagger
- * tags:
- *   name: Quiz
- *   description: Quiz management endpoints
- */
 
-/**
- * @swagger
- * /quiz/generate:
- *   post:
- *     summary: Generate a new quiz using AI
- *     tags: [Quiz]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - subject
- *               - academicLevel
- *               - difficulty
- *               - questionCount
- *             properties:
- *               subject:
- *                 type: string
- *                 example: "Mathematics"
- *               topic:
- *                 type: string
- *                 example: "Algebra"
- *               academicLevel:
- *                 type: string
- *                 enum: [
-        'class-1',
-        'class-2',
-        'class-3',
-        'class-4',
-        'class-5',
-        'class-6',
-        'class-7',
-        'jsc',
-        'ssc',
-        'hsc',
-        'bsc',
-        'msc',
-      ]
- *                 example: "high-school"
- *               difficulty:
- *                 type: string
- *                 enum: [easy, medium, hard]
- *                 example: "medium"
- *               questionCount:
- *                 type: number
- *                 minimum: 1
- *                 maximum: 50
- *                 example: 10
- *               language:
- *                 type: string
- *                 example: "english"
- *               timeLimit:
- *                 type: number
- *                 example: 30
- *               instructions:
- *                 type: string
- *                 example: "Answer all questions to the best of your ability"
- *     responses:
- *       201:
- *         description: Quiz generated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- */
 
 // generate quiz for all authorized users
 router.post(
@@ -141,23 +62,10 @@ router.post(
  *                 example: "Algebra"
  *               academicLevel:
  *                 type: string
- *                 enum: [
-        'class-1',
-        'class-2',
-        'class-3',
-        'class-4',
-        'class-5',
-        'class-6',
-        'class-7',
-        'jsc',
-        'ssc',
-        'hsc',
-        'bsc',
-        'msc',
-      ]
+ *                 enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc']
  *               difficulty:
  *                 type: string
- *                 enum: [easy, medium, hard]
+ *                 enum: ['easy', 'medium', 'hard']
  *               language:
  *                 type: string
  *                 default: "english"
@@ -279,23 +187,10 @@ router.get('/my-quizzes', auth('User'), QuizController.getUserQuizzes);
  *                 type: string
  *               academicLevel:
  *                 type: string
- *                 enum: [
-        'class-1',
-        'class-2',
-        'class-3',
-        'class-4',
-        'class-5',
-        'class-6',
-        'class-7',
-        'jsc',
-        'ssc',
-        'hsc',
-        'bsc',
-        'msc',
-      ]
+ *                 enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc']
  *               difficulty:
  *                 type: string
- *                 enum: [easy, medium, hard]
+ *                 enum: ['easy', 'medium', 'hard']
  *               timeLimit:
  *                 type: number
  *               isPublic:
