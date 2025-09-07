@@ -155,10 +155,7 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
-router.post(
-  '/resend-otp',
-  AuthController.resendOtp
-);
+router.post('/resend-otp', AuthController.resendOtp);
 
 /**
  * @swagger
@@ -274,6 +271,11 @@ router.post(
   '/refresh-token',
   validateRequest(authValidations.refreshToken),
   AuthController.refreshToken
+);
+
+router.post(
+  '/logout',
+  AuthController.logout
 );
 
 export const AuthRoutes = router;

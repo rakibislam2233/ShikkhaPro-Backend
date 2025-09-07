@@ -1,4 +1,5 @@
-import { generateQuizValidation, createQuizValidation, updateQuizValidation } from './quiz.validation';
+import { createQuizValidation, generateQuizValidation, updateQuizValidation } from "../models/quiz/quiz.validation";
+
 
 describe('Quiz Validations', () => {
   describe('generateQuizValidation', () => {

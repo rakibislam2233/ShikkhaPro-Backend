@@ -23,7 +23,7 @@ export interface IQuizAttempt {
 }
 
 export interface IQuizResult {
-  attempt: IQuizAttemptDocument;
+  attempt: IQuizAttemptDocument | any;
   quiz: IQuiz;
   detailedResults: {
     questionId: string;

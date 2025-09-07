@@ -24,7 +24,7 @@ import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 const generateQuiz = async (
   request: IGenerateQuizRequest,
   userId: string
-): Promise<IQuiz> => {
+): Promise<{ quizId: string }> => {
   try {
     const generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
     const quizData: ICreateQuizRequest = {
@@ -42,7 +42,10 @@ const generateQuiz = async (
       tags: [request.subject, request?.topic, request.academicLevel],
     };
 
-    return await createQuiz(quizData, userId);
+    const response = await createQuiz(quizData, userId);
+    return {
+      quizId: response?._id.toString(),
+    };
   } catch (error) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to generate quiz');
   }
@@ -145,7 +148,7 @@ const getUserQuizzes = async (
   filters: QuizSearchFilters,
   options: IPaginateOptions
 ): Promise<IPaginateResult<IQuiz>> => {
-  const query: any = { createdBy: filters.userId, isPublic: true };
+  const query: any = { createdBy: filters.userId };
 
   if (filters.academicLevel) {
     query.academicLevel = { $in: filters.academicLevel };
@@ -167,10 +170,7 @@ const getUserQuizzes = async (
 };
 
 // submit an answer
-const submitAnswer = async (
-  request: ISubmitAnswerRequest,
-  userId: string
-): Promise<IQuizAttemptDocument> => {
+const submitAnswer = async (request: ISubmitAnswerRequest, userId: string) => {
   const attempt = await QuizAttempt.findById(request.attemptId);
 
   if (!attempt) {
@@ -202,15 +202,15 @@ const submitAnswer = async (
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Time limit exceeded');
     }
   }
-
   attempt.answers.set(request.questionId, request.answer);
-  return await attempt.save();
+  await attempt.save();
+  return null;
 };
 
 const submitQuizAnswer = async (
   request: ISaveAnswerRequest,
   userId: string
-): Promise<IQuizResult> => {
+) => {
   const quiz = await getQuizById(request.quizId, userId);
   if (!quiz) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
@@ -222,7 +222,6 @@ const submitQuizAnswer = async (
     status: 'in-progress',
   });
 
-  console.log('existingAttempt', existingAttempt);
   if (existingAttempt) {
     Object.entries(request.answers).forEach(([questionId, answer]) => {
       existingAttempt.answers.set(questionId, answer);
@@ -230,15 +229,10 @@ const submitQuizAnswer = async (
     existingAttempt.status = 'completed';
     existingAttempt.isCompleted = true;
     existingAttempt.completedAt = new Date();
-    await existingAttempt.save();
-
-    // Calculate score
     await existingAttempt.calculateScore(quiz);
-
-    // Update quiz statistics
-    await updateQuizStats(quiz._id, existingAttempt.score!, quiz.totalPoints!);
-
-    return generateQuizResult(existingAttempt, quiz);
+    return {
+      attemptId: existingAttempt._id,
+    };
   }
 
   const attempt = new QuizAttempt({
@@ -251,15 +245,11 @@ const submitQuizAnswer = async (
   attempt.status = 'completed';
   attempt.isCompleted = true;
   attempt.completedAt = new Date();
-  await attempt.save();
-
-  // Calculate score
   await attempt.calculateScore(quiz);
 
-  // Update quiz statistics
-  await updateQuizStats(quiz._id, attempt.score!, quiz.totalPoints!);
-
-  return generateQuizResult(attempt, quiz);
+  return {
+    attemptId: attempt._id,
+  };
 };
 
 const getQuizResult = async (
@@ -359,7 +349,12 @@ const generateQuizResult = (
     };
   });
 
-  const percentage = Math.round((attempt.score! / attempt.totalScore!) * 100);
+  const correctCount = detailedResults.filter(r => r.isCorrect).length;
+  const totalQuestions = detailedResults.length;
+  const totalScore = detailedResults.reduce((sum, r) => sum + (r.isCorrect ? r.points : 0), 0);
+  const maxScore = quiz.totalPoints || quiz.questions.length;
+  
+  const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const timeSpent = attempt.timeSpent || 0;
   const averageTimePerQuestion = timeSpent / quiz.questions.length;
 
@@ -372,12 +367,22 @@ const generateQuizResult = (
 
   const recommendations = generateRecommendations(detailedResults, quiz);
 
+  // Update attempt object with correct values
+  const updatedAttempt = {
+    ...attempt.toJSON(),
+    correctAnswers: correctCount,
+    score: totalScore,
+    totalScore: maxScore,
+    percentage,
+    grade,
+  };
+
   return {
-    attempt,
+    attempt: updatedAttempt,
     quiz,
     detailedResults,
     performance: {
-      totalScore: attempt.score!,
+      totalScore,
       percentage,
       grade,
       timeSpent,

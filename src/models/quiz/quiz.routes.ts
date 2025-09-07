@@ -379,7 +379,7 @@ router.post(
  *       404:
  *         description: Attempt not found
  */
-router.get('/result/:attemptId', auth('User'), QuizController.getQuizResult);
+router.get('/attempt/results/:attemptId', auth('User'), QuizController.getQuizResult);
 
 /**
  * @swagger
