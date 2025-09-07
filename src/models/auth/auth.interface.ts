@@ -1,6 +1,5 @@
 interface IRegisterData {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   password: string;
   address: string;
@@ -11,6 +10,7 @@ interface ILoginData {
 }
 
 interface IVerifyOtpData {
+  email: string;
   otp: string;
 }
 

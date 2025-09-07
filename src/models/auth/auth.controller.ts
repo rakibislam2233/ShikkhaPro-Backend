@@ -127,8 +127,8 @@ const login = catchAsync(async (req, res) => {
 });
 
 const verifyOtp = catchAsync(async (req, res) => {
-  const { email,otp } = req.body;
-  const result = await AuthService.verifyOtp(email, otp);
+  const { email, otp } = req.body;
+  const result = await AuthService.verifyOtp({ email, otp });
   sendResponse(res, {
     code: StatusCodes.OK,
     message: 'OTP verified successfully.',

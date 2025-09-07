@@ -10,17 +10,18 @@ import { IUser, UserStatus } from '../user/user.interface';
 import { StatusCodes } from 'http-status-codes';
 import { OtpService } from '../otp/otp.services';
 import { TokenService } from '../token/token.services';
+import { IRegisterData, IVerifyOtpData } from './auth.interface';
 
-const createUser = async (userData: IUser) => {
+const createUser = async (userData: IRegisterData) => {
   const existingUser = await User.findOne({ email: userData.email });
   if (existingUser) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'User already exists.');
   }
   const newUserData: Partial<IUser> = {
-    email: userData.email,
-    password: userData.password,
+    email: userData?.email,
+    password: userData?.password,
     profile: {
-      fullName: userData.profile.fullName,
+      fullName: userData?.fullName,
     },
   };
   const user = await User.create(newUserData);
@@ -28,14 +29,14 @@ const createUser = async (userData: IUser) => {
   return tokens;
 };
 
-const verifyOtp = async (email: string, otp: string) => {
-  const user = await User.findOne({ email });
+const verifyOtp = async (payload: IVerifyOtpData) => {
+  const user = await User.findOne({ email: payload.email });
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found.');
   }
   await OtpService.verifyOTP(
     user.email,
-    otp,
+    payload.otp,
     user.isResetPassword ? OtpType.RESET_PASSWORD : OtpType.VERIFY
   );
   user.status = UserStatus.Active;
