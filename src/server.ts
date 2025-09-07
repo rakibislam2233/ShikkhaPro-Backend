@@ -5,6 +5,10 @@ import app from './app';
 import { errorLogger, logger } from './shared/logger';
 import { config } from './config';
 import { socketHelper } from './socket/socket';
+import { startLogCleanupScheduler } from './scripts/cleanupLogs';
+
+// Type for server instance
+let server: any;
 
 // Uncaught exception
 process.on('uncaughtException', error => {
@@ -12,8 +16,10 @@ process.on('uncaughtException', error => {
   process.exit(1);
 });
 
-let server: any;
-async function main() {
+/**
+ * Connect to MongoDB database
+ */
+const connectToDatabase = async (): Promise<void> => {
   try {
     await mongoose.connect(config.database.mongoUrl as string, {
       maxPoolSize: 10,
@@ -21,75 +27,148 @@ async function main() {
       socketTimeoutMS: 45000,
       family: 4,
     });
-
+    
     console.log('🚀 Database connected successfully');
-    logger.info(colors.green('🚀 Database connected successfully'));
-
-    const port =
-      typeof config.port === 'number' ? config.port : Number(config.port);
-    server = app.listen(port, config.backend.ip as string, () => {
-      console.log(
-        `♻️  Application listening on port ${config.backend.baseUrl}/test`
-      );
-      logger.info(
-        colors.yellow(
-          `♻️  Application listening on port ${config.backend.baseUrl}/test`
-        )
-      );
+    logger.info('🚀 Database connected successfully');
+    
+    // Set up mongoose connection event listeners
+    mongoose.connection.on('error', (error) => {
+      errorLogger.error('MongoDB connection error:', error);
     });
-
-    // Socket setup
-    const io = new Server(server, {
-      pingTimeout: 60000,
-      cors: {
-        origin: [
-          'http://localhost:3000',
-          'http://localhost:5173',
-          'https://rakib3000.sobhoy.com',
-          'http://10.0.80.220:3000',
-          'http://10.0.80.220:7002',
-          'http://10.0.80.220:4173',
-          'http://localhost:7003',
-          'https://rakib7002.sobhoy.com',
-        ],
-        methods: ['GET', 'POST'],
-        credentials: true,
-      },
+    
+    mongoose.connection.on('disconnected', () => {
+      logger.warn('MongoDB disconnected');
     });
-    socketHelper.socket(io);
-    global.io = io;
+    
+    mongoose.connection.on('reconnected', () => {
+      logger.info('MongoDB reconnected');
+    });
+    
   } catch (error) {
-    errorLogger.error('🤢 Failed to connect Database', error);
+    errorLogger.error('🤢 Failed to connect to Database', error);
+    throw error;
+  }
+};
+
+/**
+ * Start the HTTP server
+ */
+const startServer = (): void => {
+  const port = typeof config.port === 'number' ? config.port : Number(config.port);
+  
+  server = app.listen(port, config.backend.ip as string, () => {
+    console.log(`♻️  Application listening on port ${config.backend.baseUrl}/test`);
+    logger.info(`♻️  Application listening on port ${config.backend.baseUrl}/test`);
+  });
+
+  // Handle server errors
+  server.on('error', (error: Error) => {
+    errorLogger.error('Server error:', error);
+  });
+};
+
+/**
+ * Setup Socket.IO
+ */
+const setupSocketIO = (): void => {
+  const io = new Server(server, {
+    pingTimeout: 60000,
+    cors: {
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://rakib3000.sobhoy.com',
+        'http://10.0.80.220:3000',
+        'http://10.0.80.220:7002',
+        'http://10.0.80.220:4173',
+        'http://localhost:7003',
+        'https://rakib7002.sobhoy.com',
+      ],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+  });
+  
+  socketHelper.socket(io);
+  global.io = io;
+  
+  logger.info('Socket.IO server initialized');
+};
+
+/**
+ * Graceful shutdown handler
+ */
+const gracefulShutdown = (signal: string): void => {
+  logger.info(`${signal} received. Starting graceful shutdown...`);
+  
+  if (server) {
+    server.close(async (error?: Error) => {
+      if (error) {
+        errorLogger.error('Error closing server:', error);
+      } else {
+        logger.info('HTTP server closed');
+      }
+      
+      try {
+        await mongoose.connection.close();
+        logger.info('Database connection closed');
+        process.exit(0);
+      } catch (dbError) {
+        errorLogger.error('Error closing database connection:', dbError);
+        process.exit(1);
+      }
+    });
+    
+    // Force close after timeout
+    setTimeout(() => {
+      logger.error('Could not close connections in time, forcefully shutting down');
+      process.exit(1);
+    }, 10000);
+  } else {
+    process.exit(0);
+  }
+};
+
+/**
+ * Main application initialization
+ */
+async function main() {
+  try {
+    // Connect to database
+    await connectToDatabase();
+    
+    // Start HTTP server
+    startServer();
+    
+    // Setup Socket.IO
+    setupSocketIO();
+    
+    // Start automatic log cleanup scheduler
+    startLogCleanupScheduler();
+    
+    logger.info('🚀 Application started successfully');
+    
+  } catch (error) {
+    errorLogger.error('❌ Application failed to start:', error);
     process.exit(1);
   }
-
-  // Handle unhandled rejection
-  process.on('unhandledRejection', error => {
-    if (server) {
-      server.close(() => {
-        errorLogger.error('UnhandledRejection Detected', error);
-        process.exit(1);
-      });
-    } else {
-      process.exit(1);
-    }
-  });
 }
 
+// Start the application
 main();
 
-// SIGTERM
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM IS RECEIVE');
-  if (server) {
-    server.close();
-  }
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
+  errorLogger.error('Unhandled Promise Rejection:', { reason, promise });
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-// SIGINT
+// Handle SIGTERM
+process.on('SIGTERM', () => {
+  gracefulShutdown('SIGTERM');
+});
+
+// Handle SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
-  logger.info('SIGINT IS RECEIVE');
-  if (server) {
-    server.close();
-  }
+  gracefulShutdown('SIGINT');
 });

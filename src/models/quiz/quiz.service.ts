@@ -12,6 +12,7 @@ import {
 } from './quiz.interface';
 import {
   IQuizAttempt,
+  IQuizAttemptDocument,
   IQuizResult,
   IStartQuizAttemptRequest,
   ISubmitAnswerRequest,
@@ -189,7 +190,7 @@ const getUserQuizzes = async (
 const startQuizAttempt = async (
   request: IStartQuizAttemptRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const quiz = await getQuizById(request.quizId, userId);
 
   // Check if user already has an in-progress attempt for this quiz
@@ -218,7 +219,7 @@ const startQuizAttempt = async (
 const submitAnswer = async (
   request: ISubmitAnswerRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(request.attemptId);
 
   if (!attempt) {
@@ -258,7 +259,7 @@ const submitAnswer = async (
 const saveAnswers = async (
   request: ISaveAnswerRequest,
   userId: string
-): Promise<IQuizAttempt> => {
+): Promise<IQuizAttemptDocument> => {
   const attempt = await QuizAttempt.findById(request.attemptId);
 
   if (!attempt) {
@@ -394,7 +395,7 @@ const updateQuizStats = async (
 };
 
 const generateQuizResult = (
-  attempt: IQuizAttempt,
+  attempt: IQuizAttemptDocument,
   quiz: IQuiz
 ): IQuizResult => {
   const detailedResults = quiz.questions.map(question => {

@@ -16,6 +16,7 @@ import i18next from './i18n/i18n';
 import globalErrorHandler from './middlewares/globalErrorHandler';
 import notFound from './middlewares/notFound';
 import router from './routes';
+import { setupSwagger } from './docs/swagger';
 
 // Create Express application
 const app = express();
@@ -378,16 +379,25 @@ app.use(getSecurityLoggingMiddleware());
 // Routes
 // =====================
 
+// Setup Swagger documentation
+if (process.env.NODE_ENV !== 'production') {
+  setupSwagger(app);
+}
+
 // Main API routes
 app.use('/api/v1', router);
 
 // Health check endpoints
 app.get('/test', (req: Request, res: Response) => {
   res.status(200).json({
-    message: 'Welcome to the ShikkaPro Website website backend',
+    message: 'Welcome to the Exam Quiz Generator API',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     version: process.env.npm_package_version || '1.0.0',
+    documentation: {
+      swagger: process.env.NODE_ENV !== 'production' ? '/api-docs' : 'Contact admin for documentation',
+      routes: '/api/v1',
+    },
     security: {
       cors: 'enabled',
       helmet: 'enabled',
@@ -397,17 +407,42 @@ app.get('/test', (req: Request, res: Response) => {
       hpp: 'enabled',
       mongoSanitize: 'enabled',
     },
+    features: {
+      aiQuizGeneration: 'enabled',
+      realTimeAttempts: 'enabled',
+      analytics: 'enabled',
+      multiLanguage: 'enabled',
+    },
   });
 });
 
 // Detailed health check endpoint
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({
+  const healthCheck = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-  });
+    uptime: {
+      process: process.uptime(),
+      system: require('os').uptime(),
+    },
+    memory: {
+      ...process.memoryUsage(),
+      freeMemory: require('os').freemem(),
+      totalMemory: require('os').totalmem(),
+    },
+    cpu: {
+      loadAverage: require('os').loadavg(),
+      cpuCount: require('os').cpus().length,
+    },
+    node: {
+      version: process.version,
+      platform: process.platform,
+      arch: process.arch,
+    },
+    environment: process.env.NODE_ENV || 'development',
+  };
+
+  res.status(200).json(healthCheck);
 });
 
 // =====================

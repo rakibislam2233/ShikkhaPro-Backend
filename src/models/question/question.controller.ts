@@ -152,7 +152,7 @@ const searchQuestions = catchAsync(async (req: Request, res) => {
     filters.tags = filters.tags.split(',');
   }
   if (filters.isApproved && typeof filters.isApproved === 'string') {
-    (filters.isApproved as boolean) = filters.isApproved === 'true';
+    (filters as any).isApproved = filters.isApproved === 'true';
   }
 
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'sortOrder']);

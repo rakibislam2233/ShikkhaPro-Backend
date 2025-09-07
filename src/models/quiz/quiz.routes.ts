@@ -9,7 +9,6 @@ import {
   generateQuizValidation,
   getQuizValidation,
   saveAnswersValidation,
-  searchQuizzesValidation,
   startQuizAttemptValidation,
   submitAnswerValidation,
   updateQuizValidation,
@@ -17,7 +16,86 @@ import {
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Quiz
+ *   description: Quiz management endpoints
+ */
 
+/**
+ * @swagger
+ * /quiz/generate:
+ *   post:
+ *     summary: Generate a new quiz using AI
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - subject
+ *               - academicLevel
+ *               - difficulty
+ *               - questionCount
+ *             properties:
+ *               subject:
+ *                 type: string
+ *                 example: "Mathematics"
+ *               topic:
+ *                 type: string
+ *                 example: "Algebra"
+ *               academicLevel:
+ *                 type: string
+ *                 enum: [
+        'class-1',
+        'class-2',
+        'class-3',
+        'class-4',
+        'class-5',
+        'class-6',
+        'class-7',
+        'jsc',
+        'ssc',
+        'hsc',
+        'bsc',
+        'msc',
+      ]
+ *                 example: "high-school"
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *                 example: "medium"
+ *               questionCount:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 50
+ *                 example: 10
+ *               language:
+ *                 type: string
+ *                 example: "english"
+ *               timeLimit:
+ *                 type: number
+ *                 example: 30
+ *               instructions:
+ *                 type: string
+ *                 example: "Answer all questions to the best of your ability"
+ *     responses:
+ *       201:
+ *         description: Quiz generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 
 // generate quiz for all authorized users
 router.post(
@@ -27,18 +105,240 @@ router.post(
   QuizController.generateQuiz
 );
 
+/**
+ * @swagger
+ * /quiz:
+ *   post:
+ *     summary: Create a new quiz
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - subject
+ *               - academicLevel
+ *               - difficulty
+ *               - questions
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Basic Algebra Quiz"
+ *               description:
+ *                 type: string
+ *                 example: "A quiz covering basic algebraic concepts"
+ *               subject:
+ *                 type: string
+ *                 example: "Mathematics"
+ *               topic:
+ *                 type: string
+ *                 example: "Algebra"
+ *               academicLevel:
+ *                 type: string
+ *                 enum: [
+        'class-1',
+        'class-2',
+        'class-3',
+        'class-4',
+        'class-5',
+        'class-6',
+        'class-7',
+        'jsc',
+        'ssc',
+        'hsc',
+        'bsc',
+        'msc',
+      ]
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *               language:
+ *                 type: string
+ *                 default: "english"
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Question'
+ *               timeLimit:
+ *                 type: number
+ *                 description: "Time limit in minutes"
+ *               isPublic:
+ *                 type: boolean
+ *                 default: false
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Quiz created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
 
 // create specific quize as teacher or student (not implemented yet)
 router.post(
   '/',
-  auth("User"),
+  auth('User'),
   validateRequest(createQuizValidation),
   QuizController.createQuiz
 );
 
+/**
+ * @swagger
+ * /quiz/my-quizzes:
+ *   get:
+ *     summary: Get all quizzes created by current user
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *           default: 10
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User quizzes retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: Unauthorized
+ */
 // get my all quizzes
-router.get('/my-quizzes', auth("User"), QuizController.getUserQuizzes);
+router.get('/my-quizzes', auth('User'), QuizController.getUserQuizzes);
 
+/**
+ * @swagger
+ * /quiz/{id}:
+ *   get:
+ *     summary: Get quiz by ID
+ *     tags: [Quiz]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Quiz ID
+ *     responses:
+ *       200:
+ *         description: Quiz retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: Quiz not found
+ *   patch:
+ *     summary: Update quiz
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Quiz ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               topic:
+ *                 type: string
+ *               academicLevel:
+ *                 type: string
+ *                 enum: [
+        'class-1',
+        'class-2',
+        'class-3',
+        'class-4',
+        'class-5',
+        'class-6',
+        'class-7',
+        'jsc',
+        'ssc',
+        'hsc',
+        'bsc',
+        'msc',
+      ]
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *               timeLimit:
+ *                 type: number
+ *               isPublic:
+ *                 type: boolean
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Quiz updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Quiz not found
+ *   delete:
+ *     summary: Delete quiz
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Quiz ID
+ *     responses:
+ *       200:
+ *         description: Quiz deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Quiz not found
+ */
 router.get(
   '/:id',
   validateRequest(getQuizValidation),
@@ -47,52 +347,275 @@ router.get(
 
 router.patch(
   '/:id',
-  auth("User"),
+  auth('User'),
   validateRequest(updateQuizValidation),
   QuizController.updateQuiz
 );
 
 router.delete(
   '/:id',
-  auth("User"),
+  auth('User'),
   validateRequest(deleteQuizValidation),
   QuizController.deleteQuiz
 );
 
+/**
+ * @swagger
+ * /quiz/attempt/start:
+ *   post:
+ *     summary: Start a quiz attempt
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - quizId
+ *             properties:
+ *               quizId:
+ *                 type: string
+ *                 description: ID of the quiz to attempt
+ *     responses:
+ *       201:
+ *         description: Quiz attempt started successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Quiz not found
+ */
 // Quiz attempt management
 router.post(
   '/attempt/start',
-  auth("User"),
+  auth('User'),
   validateRequest(startQuizAttemptValidation),
   QuizController.startQuizAttempt
 );
 
+/**
+ * @swagger
+ * /quiz/attempt/answer:
+ *   post:
+ *     summary: Submit answer for a question
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - attemptId
+ *               - questionId
+ *               - answer
+ *             properties:
+ *               attemptId:
+ *                 type: string
+ *               questionId:
+ *                 type: string
+ *               answer:
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: array
+ *                     items:
+ *                       type: string
+ *     responses:
+ *       200:
+ *         description: Answer submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Attempt not found
+ */
 router.post(
   '/attempt/answer',
-  auth("User"),
+  auth('User'),
   validateRequest(submitAnswerValidation),
   QuizController.submitAnswer
 );
 
+/**
+ * @swagger
+ * /quiz/attempt/save:
+ *   post:
+ *     summary: Save answers for multiple questions
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - attemptId
+ *               - answers
+ *             properties:
+ *               attemptId:
+ *                 type: string
+ *               answers:
+ *                 type: object
+ *                 additionalProperties:
+ *                   oneOf:
+ *                     - type: string
+ *                     - type: array
+ *                       items:
+ *                         type: string
+ *     responses:
+ *       200:
+ *         description: Answers saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Attempt not found
+ */
 router.post(
   '/attempt/save',
-  auth("User"),
+  auth('User'),
   validateRequest(saveAnswersValidation),
   QuizController.saveAnswers
 );
 
+/**
+ * @swagger
+ * /quiz/attempt/complete:
+ *   post:
+ *     summary: Complete a quiz attempt
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - attemptId
+ *             properties:
+ *               attemptId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Quiz completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Attempt not found
+ */
 router.post(
   '/attempt/complete',
-  auth("User"),
+  auth('User'),
   validateRequest(completeQuizAttemptValidation),
   QuizController.completeQuizAttempt
 );
 
-router.get('/result/:attemptId', auth("User"), QuizController.getQuizResult);
+/**
+ * @swagger
+ * /quiz/result/{attemptId}:
+ *   get:
+ *     summary: Get quiz result for an attempt
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: attemptId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Quiz attempt ID
+ *     responses:
+ *       200:
+ *         description: Quiz result retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Attempt not found
+ */
+router.get('/result/:attemptId', auth('User'), QuizController.getQuizResult);
 
+/**
+ * @swagger
+ * /quiz/stats/user:
+ *   get:
+ *     summary: Get user quiz statistics
+ *     tags: [Quiz]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: Unauthorized
+ */
 // Statistics and leaderboard
-router.get('/stats/user', auth("User"), QuizController.getUserStats);
+router.get('/stats/user', auth('User'), QuizController.getUserStats);
 
+/**
+ * @swagger
+ * /quiz/stats/leaderboard:
+ *   get:
+ *     summary: Get quiz leaderboard
+ *     tags: [Quiz]
+ *     parameters:
+ *       - in: query
+ *         name: subject
+ *         schema:
+ *           type: string
+ *         description: Filter by subject
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *           default: 10
+ *         description: Number of top users to return
+ *     responses:
+ *       200:
+ *         description: Leaderboard retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
 router.get('/stats/leaderboard', QuizController.getLeaderboard);
 
 export default router;

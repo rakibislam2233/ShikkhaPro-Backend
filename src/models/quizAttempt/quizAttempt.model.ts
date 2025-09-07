@@ -1,12 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 import {
   IQuizAttempt,
+  IQuizAttemptDocument,
   IQuizAttemptModel,
   IQuizStats,
 } from './quizAttempt.interface';
 import paginate from '../../common/plugins/paginate';
 
-const quizAttemptSchema = new Schema<IQuizAttempt, IQuizAttemptModel>(
+const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
   {
     quizId: {
       type: Schema.Types.ObjectId,
@@ -91,14 +92,14 @@ quizAttemptSchema.index({ userId: 1, createdAt: -1 });
 quizAttemptSchema.index({ score: -1, completedAt: -1 });
 
 // Virtual for percentage
-quizAttemptSchema.virtual('percentage').get(function() {
+quizAttemptSchema.virtual('percentage').get(function(this: IQuizAttemptDocument) {
   if (!this.totalScore || this.totalScore === 0) return 0;
-  return Math.round((this.score / this.totalScore) * 100);
+  return Math.round(((this.score || 0) / this.totalScore) * 100);
 });
 
 // Virtual for grade
-quizAttemptSchema.virtual('grade').get(function() {
-  const percentage = this.percentage;
+quizAttemptSchema.virtual('grade').get(function(this: IQuizAttemptDocument) {
+  const percentage = this.get('percentage') as number || 0;
   if (percentage >= 90) return 'A+';
   if (percentage >= 80) return 'A';
   if (percentage >= 70) return 'B';
@@ -115,13 +116,13 @@ quizAttemptSchema.statics.isExistAttemptById = async function(id: string) {
   return await this.findById(id).lean();
 };
 
-quizAttemptSchema.statics.getUserAttempts = async function(userId: string) {
+quizAttemptSchema.statics.getUserAttempts = async function(userId: string): Promise<IQuizAttemptDocument[]> {
   return await this.find({ userId })
     .populate('quizId', 'title subject topic difficulty')
     .sort({ createdAt: -1 });
 };
 
-quizAttemptSchema.statics.getQuizAttempts = async function(quizId: string) {
+quizAttemptSchema.statics.getQuizAttempts = async function(quizId: string): Promise<IQuizAttemptDocument[]> {
   return await this.find({ quizId, status: 'completed' })
     .populate('userId', 'profile.fullName email')
     .sort({ score: -1, completedAt: -1 });
@@ -295,4 +296,4 @@ quizAttemptSchema.methods.calculateScore = function(quiz: any) {
   return this.save();
 };
 
-export const QuizAttempt = mongoose.model<IQuizAttempt, IQuizAttemptModel>('QuizAttempt', quizAttemptSchema);
+export const QuizAttempt = mongoose.model<IQuizAttemptDocument, IQuizAttemptModel>('QuizAttempt', quizAttemptSchema);

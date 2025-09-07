@@ -104,7 +104,6 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
     tags: {
       type: [String],
       default: [],
-      index: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,

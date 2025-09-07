@@ -497,7 +497,7 @@ const generateQuizResult = (attempt: IQuizAttemptDocument, quiz: IQuiz): IQuizRe
   const timeSpent = attempt.timeSpent || 0;
   const questions = quiz.questions;
   const numQuestions = questions.length;
-  const averageTimePerQuestion = Number(timeSpent) / numQuestions;
+  const averageTimePerQuestion = (timeSpent || 0) / numQuestions;
 
   let grade = 'F';
   if (percentage >= 90) grade = 'A+';

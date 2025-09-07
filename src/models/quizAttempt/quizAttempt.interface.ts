@@ -6,7 +6,7 @@ export interface IQuizAttempt {
   _id: mongoose.Types.ObjectId;
   quizId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  answers: { [questionId: string]: string | string[] };
+  answers: Map<string, string | string[]>;
   startedAt: Date;
   completedAt?: Date;
   score?: number;
@@ -23,7 +23,7 @@ export interface IQuizAttempt {
 }
 
 export interface IQuizResult {
-  attempt: IQuizAttempt;
+  attempt: IQuizAttemptDocument;
   quiz: IQuiz;
   detailedResults: {
     questionId: string;
@@ -69,14 +69,19 @@ export interface IAchievement {
   category: 'performance' | 'consistency' | 'improvement' | 'milestone';
 }
 
-export interface IQuizAttemptModel extends Model<IQuizAttempt> {
+export interface IQuizAttemptDocument extends IQuizAttempt, mongoose.Document {
+  _id: mongoose.Types.ObjectId;
+  calculateScore(quiz: any): Promise<IQuizAttemptDocument>;
+}
+
+export interface IQuizAttemptModel extends Model<IQuizAttemptDocument> {
   paginate: (
     filter: object,
     options: IPaginateOptions
-  ) => Promise<IPaginateResult<IQuizAttempt>>;
-  isExistAttemptById(id: string): Promise<Partial<IQuizAttempt> | null>;
-  getUserAttempts(userId: string): Promise<IQuizAttempt[]>;
-  getQuizAttempts(quizId: string): Promise<IQuizAttempt[]>;
+  ) => Promise<IPaginateResult<IQuizAttemptDocument>>;
+  isExistAttemptById(id: string): Promise<Partial<IQuizAttemptDocument> | null>;
+  getUserAttempts(userId: string): Promise<IQuizAttemptDocument[]>;
+  getQuizAttempts(quizId: string): Promise<IQuizAttemptDocument[]>;
   getUserStats(userId: string): Promise<IQuizStats>;
   getLeaderboard(quizId?: string, limit?: number): Promise<any[]>;
 }

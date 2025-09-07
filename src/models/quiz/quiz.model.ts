@@ -149,7 +149,6 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     tags: {
       type: [String],
       default: [],
-      index: true,
     },
     estimatedTime: {
       type: Number,
