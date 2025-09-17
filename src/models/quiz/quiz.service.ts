@@ -82,10 +82,10 @@ const createQuiz = async (
 
 // get specific user single quiz
 const getQuizById = async (quizId: string, userId?: string): Promise<IQuiz> => {
-  const quiz = await Quiz.findById(quizId).populate(
-    'createdBy',
-    'profile.fullName email'
-  );
+  const quiz = await Quiz.findOne({
+    _id: quizId,
+    status: { $ne: 'archived' },
+  }).populate('createdBy', 'profile.fullName email');
   if (!quiz) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
   }
@@ -148,7 +148,10 @@ const getUserQuizzes = async (
   filters: QuizSearchFilters,
   options: IPaginateOptions
 ): Promise<IPaginateResult<IQuiz>> => {
-  const query: any = { createdBy: filters.userId };
+  const query: any = {
+    createdBy: filters?.userId,
+    status: { $ne: 'archived' },
+  };
 
   if (filters.academicLevel) {
     query.academicLevel = { $in: filters.academicLevel };
@@ -207,6 +210,22 @@ const submitAnswer = async (request: ISubmitAnswerRequest, userId: string) => {
   return null;
 };
 
+const startQuiz = async (quizId: string, userId: string) => {
+  const quiz = await getQuizById(quizId, userId);
+  if (!quiz) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
+  }
+  const attempt = await QuizAttempt.create({
+    quizId: quizId,
+    userId,
+    status: 'in-progress',
+    startedAt: new Date(),
+    totalQuestions: quiz.questions.length,
+    timeLimit: quiz.estimatedTime,
+  });
+  return { attemptId: attempt._id };
+};
+
 const submitQuizAnswer = async (
   request: ISaveAnswerRequest,
   userId: string
@@ -222,6 +241,7 @@ const submitQuizAnswer = async (
     status: 'in-progress',
   });
 
+
   if (existingAttempt) {
     Object.entries(request.answers).forEach(([questionId, answer]) => {
       existingAttempt.answers.set(questionId, answer);
@@ -235,12 +255,17 @@ const submitQuizAnswer = async (
     };
   }
 
+  const startedAt =
+    request.startedAt ||
+    new Date(Date.now() - (request.timeSpent || 0) * 60 * 1000);
+
   const attempt = new QuizAttempt({
     quizId: request.quizId,
     userId,
     totalQuestions: quiz.questions.length,
     timeLimit: quiz.timeLimit,
     answers: request.answers,
+    startedAt: startedAt,
   });
   attempt.status = 'completed';
   attempt.isCompleted = true;
@@ -351,19 +376,52 @@ const generateQuizResult = (
 
   const correctCount = detailedResults.filter(r => r.isCorrect).length;
   const totalQuestions = detailedResults.length;
-  const totalScore = detailedResults.reduce((sum, r) => sum + (r.isCorrect ? r.points : 0), 0);
+  const totalScore = detailedResults.reduce(
+    (sum, r) => sum + (r.isCorrect ? r.points : 0),
+    0
+  );
   const maxScore = quiz.totalPoints || quiz.questions.length;
-  
-  const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+  const percentage =
+    totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const timeSpent = attempt.timeSpent || 0;
   const averageTimePerQuestion = timeSpent / quiz.questions.length;
 
+  // Bangladesh grading system
   let grade = 'F';
-  if (percentage >= 90) grade = 'A+';
-  else if (percentage >= 80) grade = 'A';
-  else if (percentage >= 70) grade = 'B';
-  else if (percentage >= 60) grade = 'C';
-  else if (percentage >= 50) grade = 'D';
+  let gpa = 0.00;
+
+  if (percentage >= 80) {
+    grade = 'A+';
+    gpa = 5.00;
+  } else if (percentage >= 75) {
+    grade = 'A';
+    gpa = 4.00;
+  } else if (percentage >= 70) {
+    grade = 'A-';
+    gpa = 3.50;
+  } else if (percentage >= 65) {
+    grade = 'B+';
+    gpa = 3.25;
+  } else if (percentage >= 60) {
+    grade = 'B';
+    gpa = 3.00;
+  } else if (percentage >= 55) {
+    grade = 'B-';
+    gpa = 2.75;
+  } else if (percentage >= 50) {
+    grade = 'C+';
+    gpa = 2.50;
+  } else if (percentage >= 45) {
+    grade = 'C';
+    gpa = 2.25;
+  } else if (percentage >= 40) {
+    grade = 'D';
+    gpa = 2.00;
+  } else {
+    grade = 'F';
+    gpa = 0.00;
+  }
 
   const recommendations = generateRecommendations(detailedResults, quiz);
 
@@ -375,6 +433,7 @@ const generateQuizResult = (
     totalScore: maxScore,
     percentage,
     grade,
+    gpa,
   };
 
   return {
@@ -385,6 +444,7 @@ const generateQuizResult = (
       totalScore,
       percentage,
       grade,
+      gpa,
       timeSpent,
       averageTimePerQuestion,
     },
@@ -432,6 +492,7 @@ export const QuizServices = {
   deleteQuiz,
   getUserQuizzes,
   submitAnswer,
+  startQuiz,
   submitQuizAnswer,
   getQuizResult,
   generateQuiz,

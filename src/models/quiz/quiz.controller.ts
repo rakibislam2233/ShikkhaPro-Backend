@@ -25,7 +25,7 @@ const generateQuiz = catchAsync(async (req, res) => {
 
 // not implemented yet
 const createQuiz = catchAsync(async (req, res) => {
-  const {userId} = req?.user;
+  const { userId } = req?.user;
   if (!userId) {
     return sendResponse(res, {
       code: StatusCodes.UNAUTHORIZED,
@@ -86,7 +86,7 @@ const updateQuiz = catchAsync(async (req, res) => {
 // delete specific user single quiz
 const deleteQuiz = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const {userId} = req?.user;
+  const { userId } = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -132,9 +132,8 @@ const getUserQuizzes = catchAsync(async (req, res) => {
   });
 });
 
-
 const submitAnswer = catchAsync(async (req, res) => {
-  const {userId} = req?.user;
+  const { userId } = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -152,8 +151,26 @@ const submitAnswer = catchAsync(async (req, res) => {
   });
 });
 
+const startQuiz = catchAsync(async (req, res) => {
+  const { userId } = req?.user;
+  const { quizId } = req.body;
+
+  if (!userId) {
+    return sendResponse(res, {
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'User authentication required',
+    });
+  }
+  const attempt = await QuizServices.startQuiz(quizId, userId);
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Quiz started successfully',
+    data: attempt,
+  });
+});
+
 const submitQuizAnswer = catchAsync(async (req, res) => {
-  const {userId} = req?.user;
+  const { userId } = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -173,7 +190,7 @@ const submitQuizAnswer = catchAsync(async (req, res) => {
 
 const getQuizResult = catchAsync(async (req, res) => {
   const { attemptId } = req.params;
-  const {userId} = req?.user;
+  const { userId } = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -192,7 +209,7 @@ const getQuizResult = catchAsync(async (req, res) => {
 });
 
 const getUserStats = catchAsync(async (req, res) => {
-  const {userId} = req?.user;
+  const { userId } = req?.user;
 
   if (!userId) {
     return sendResponse(res, {
@@ -234,6 +251,7 @@ export const QuizController = {
   deleteQuiz,
   getUserQuizzes,
   submitAnswer,
+  startQuiz,
   submitQuizAnswer,
   getQuizResult,
   getUserStats,

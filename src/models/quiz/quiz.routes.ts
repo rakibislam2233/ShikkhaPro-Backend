@@ -251,7 +251,6 @@ router.delete(
   QuizController.deleteQuiz
 );
 
-
 /**
  * @swagger
  * /quiz/attempt/answer:
@@ -300,6 +299,13 @@ router.post(
   auth('User'),
   validateRequest(submitAnswerValidation),
   QuizController.submitAnswer
+);
+
+// start quiz
+router.post(
+  '/attempt/start',
+  auth('User'),
+  QuizController.startQuiz
 );
 
 /**
@@ -351,7 +357,6 @@ router.post(
   QuizController.submitQuizAnswer
 );
 
-
 /**
  * @swagger
  * /quiz/result/{attemptId}:
@@ -379,7 +384,11 @@ router.post(
  *       404:
  *         description: Attempt not found
  */
-router.get('/attempt/results/:attemptId', auth('User'), QuizController.getQuizResult);
+router.get(
+  '/attempt/results/:attemptId',
+  auth('User'),
+  QuizController.getQuizResult
+);
 
 /**
  * @swagger

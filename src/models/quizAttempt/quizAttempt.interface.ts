@@ -38,6 +38,7 @@ export interface IQuizResult {
     totalScore: number;
     percentage: number;
     grade: string;
+    gpa: number;
     timeSpent: number;
     averageTimePerQuestion: number;
   };
@@ -95,4 +96,6 @@ export interface ISubmitAnswerRequest {
 export interface ISaveAnswerRequest {
   quizId: string;
   answers: { [questionId: string]: string | string[] };
+  timeSpent?: number; // in minutes, time spent on the quiz from frontend
+  startedAt?: Date; // when the quiz was actually started
 }

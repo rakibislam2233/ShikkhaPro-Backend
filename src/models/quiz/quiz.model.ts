@@ -234,7 +234,7 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     status: {
       type: String,
       enum: ['draft', 'published', 'archived'],
-      default: 'draft',
+      default: 'published',
       index: true,
     },
   },

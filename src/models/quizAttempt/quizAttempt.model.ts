@@ -97,15 +97,34 @@ quizAttemptSchema.virtual('percentage').get(function(this: IQuizAttemptDocument)
   return Math.round(((this.score || 0) / this.totalScore) * 100);
 });
 
-// Virtual for grade
+// Virtual for grade (Bangladesh grading system)
 quizAttemptSchema.virtual('grade').get(function(this: IQuizAttemptDocument) {
   const percentage = this.get('percentage') as number || 0;
-  if (percentage >= 90) return 'A+';
-  if (percentage >= 80) return 'A';
-  if (percentage >= 70) return 'B';
-  if (percentage >= 60) return 'C';
-  if (percentage >= 50) return 'D';
+  if (percentage >= 80) return 'A+';
+  if (percentage >= 75) return 'A';
+  if (percentage >= 70) return 'A-';
+  if (percentage >= 65) return 'B+';
+  if (percentage >= 60) return 'B';
+  if (percentage >= 55) return 'B-';
+  if (percentage >= 50) return 'C+';
+  if (percentage >= 45) return 'C';
+  if (percentage >= 40) return 'D';
   return 'F';
+});
+
+// Virtual for GPA (Bangladesh grading system)
+quizAttemptSchema.virtual('gpa').get(function(this: IQuizAttemptDocument) {
+  const percentage = this.get('percentage') as number || 0;
+  if (percentage >= 80) return 5.00;
+  if (percentage >= 75) return 4.00;
+  if (percentage >= 70) return 3.50;
+  if (percentage >= 65) return 3.25;
+  if (percentage >= 60) return 3.00;
+  if (percentage >= 55) return 2.75;
+  if (percentage >= 50) return 2.50;
+  if (percentage >= 45) return 2.25;
+  if (percentage >= 40) return 2.00;
+  return 0.00;
 });
 
 // Add pagination plugin
