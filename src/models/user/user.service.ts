@@ -214,7 +214,6 @@ const updateMyProfile = async (
     address?: string;
     bio?: string;
     organization?: string;
-    avatar?: string;
   }
 ): Promise<IUser | null> => {
   const updateQuery = {
@@ -224,13 +223,29 @@ const updateMyProfile = async (
       'profile.address': updateData.address,
       'profile.bio': updateData.bio,
       'profile.organization': updateData.organization,
-      'profile.avatar': updateData.avatar,
     },
   };
 
   const user = await User.findByIdAndUpdate(userId, updateQuery, {
     new: true,
   }).select(
+    '-password -__v -security -preferences -socialAccounts -profile._id -isResetPassword -metadata.ipAddresses -metadata.userAgent -metadata._id'
+  );
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found.');
+  }
+  return user;
+};
+
+const updateProfileImage = async (
+  userId: string,
+  profileImage: string
+): Promise<IUser | null> => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { 'profile.avatar': profileImage },
+    { new: true }
+  ).select(
     '-password -__v -security -preferences -socialAccounts -profile._id -isResetPassword -metadata.ipAddresses -metadata.userAgent -metadata._id'
   );
   if (!user) {
@@ -255,5 +270,6 @@ export const UserService = {
   updateMyProfile,
   getDashboardOverview,
   userActivityGraphChart,
+  updateProfileImage,
   deleteMyProfile,
 };

@@ -65,20 +65,34 @@ const getMyProfile = catchAsync(async (req, res) => {
 });
 
 const updateMyProfile = catchAsync(async (req, res) => {
-
-  console.log("BODY", req.body);
   const { userId } = req.user;
-  // Handle file upload
-  if (req.file) {
-    console.log("REQUEST FILE", req.file);
-    req.body.avatar = `/${USER_UPLOAD_FOLDER}/${req.file.path}`;
-  }
   const updateData = req?.body;
   const user = await UserService.updateMyProfile(userId, updateData);
   sendResponse(res, {
     code: StatusCodes.OK,
     message: 'Profile updated successfully.',
     data: user,
+  });
+});
+const uploadProfileImage = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+
+  if (!req.file) {
+    return sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: 'No image file provided.',
+      data: null,
+    });
+  }
+
+  let profileImage: string = '';
+  profileImage = `/${USER_UPLOAD_FOLDER}/${req.file.filename}`;
+
+  const result = await UserService.updateProfileImage(userId, profileImage);
+  sendResponse(res, {
+    code: StatusCodes.OK,
+    message: 'Profile image uploaded successfully.',
+    data: result,
   });
 });
 const deleteMyProfile = catchAsync(async (req, res) => {
@@ -98,6 +112,7 @@ export const UserController = {
   getMyProfile,
   userActivityGraphChart,
   updateMyProfile,
+  uploadProfileImage,
   deleteMyProfile,
   getDashboardOverview,
 };

@@ -77,6 +77,8 @@ const getCorsOptions = (allowedOrigins: string[]) => {
       'Connection',
       'User-Agent',
       'X-CSRF-Token',
+      'Cache-Control',
+      'Pragma',
     ],
     exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
     preflightContinue: false,

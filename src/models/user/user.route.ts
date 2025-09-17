@@ -296,11 +296,14 @@ router.get('/profile/me', auth('Common'), UserController.getMyProfile);
  *       401:
  *         description: Unauthorized
  */
+router.patch('/profile/update', auth('Common'), UserController.updateMyProfile);
+
+
 router.patch(
-  '/profile/update',
+  '/profile/image',
+  uploads.single('profileImage'),
   auth('Common'),
-  uploads.single('avatar'),
-  UserController.updateMyProfile
+  UserController.uploadProfileImage
 );
 
 /**
