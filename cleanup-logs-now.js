@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const fs = require('fs');
 const path = require('path');
 
@@ -53,32 +51,31 @@ function cleanupLogs() {
               const fileAgeDays = Math.floor(fileAge / (1000 * 60 * 60 * 24));
               
               if (stats.mtime < cutoffTime) {
-                try {
-                  // Check if file is in use (Windows specific)
-                  const fd = fs.openSync(filePath, 'r+');
-                  fs.closeSync(fd);
-                  
-                  // File is not locked, safe to delete
-                  totalSizeFreed += stats.size;
-                  fs.unlinkSync(filePath);
-                  totalFilesDeleted++;
-                  console.log(`   ❌ Deleted: ${file} (${fileSizeKB} KB, ${fileAgeDays} days old)`);
-                } catch (lockError) {
-                  if (lockError.code === 'EBUSY' || lockError.code === 'EPERM') {
-                    console.log(`   🔒 Skipped: ${file} (${fileSizeKB} KB) - File in use`);
-                  } else {
-                    // Try to force delete after a short delay
-                    setTimeout(() => {
-                      try {
-                        fs.unlinkSync(filePath);
-                        totalSizeFreed += stats.size;
-                        totalFilesDeleted++;
-                        console.log(`   ❌ Force deleted: ${file} (${fileSizeKB} KB)`);
-                      } catch (forceError) {
-                        console.log(`   ⚠️ Cannot delete: ${file} - ${forceError.message}`);
+                let deleted = false;
+                for (let i = 0; i < 3; i++) {
+                  try {
+                    fs.unlinkSync(filePath);
+                    totalSizeFreed += stats.size;
+                    totalFilesDeleted++;
+                    console.log(`   ❌ Deleted: ${file} (${fileSizeKB} KB, ${fileAgeDays} days old)`);
+                    deleted = true;
+                    break;
+                  } catch (deleteError) {
+                    if (deleteError.code === 'EBUSY' || deleteError.code === 'EPERM') {
+                      if (i < 2) { // if not the last attempt
+                        console.log(`   ⏳ ${file} is in use, retrying...`);
+                        // Synchronous delay
+                        const waitTill = new Date(new Date().getTime() + 500);
+                        while(waitTill > new Date()){}
                       }
-                    }, 1000);
+                    } else {
+                      console.error(`   ⚠️ Error deleting ${file}: ${deleteError.message}`);
+                      break; // don't retry on other errors
+                    }
                   }
+                }
+                if (!deleted) {
+                  console.log(`   🔒 Skipped after retries: ${file} (${fileSizeKB} KB) - File remains in use`);
                 }
               } else {
                 console.log(`   ✅ Kept: ${file} (${fileSizeKB} KB, ${fileAgeDays} days old) - Recent file`);

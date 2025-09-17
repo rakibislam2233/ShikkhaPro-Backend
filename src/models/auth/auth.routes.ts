@@ -274,8 +274,12 @@ router.post(
 );
 
 router.post(
-  '/logout',
-  AuthController.logout
+  '/change-password',
+  auth('User'),
+  validateRequest(authValidations.changePassword),
+  AuthController.changePassword
 );
+
+router.post('/logout', AuthController.logout);
 
 export const AuthRoutes = router;

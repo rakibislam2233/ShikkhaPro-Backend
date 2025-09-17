@@ -65,6 +65,8 @@ const getMyProfile = catchAsync(async (req, res) => {
 });
 
 const updateMyProfile = catchAsync(async (req, res) => {
+
+  console.log("BODY", req.body);
   const { userId } = req.user;
   // Handle file upload
   if (req.file) {

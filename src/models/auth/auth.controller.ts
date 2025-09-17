@@ -122,7 +122,7 @@ const login = catchAsync(async (req, res) => {
   sendResponse(res, {
     code: StatusCodes.OK,
     message: 'User logged in successfully.',
-    data: { tokens },
+    data: tokens,
   });
 });
 
@@ -157,7 +157,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
   const { userId } = req.user;
-  const { currentPassword, newPassword, mfaToken } = req.body;
+  const { currentPassword, newPassword } = req.body;
 
   await User.findById(userId).select('+mfaSecret');
 
@@ -169,7 +169,7 @@ const changePassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     code: StatusCodes.OK,
     message: 'Password changed successfully.',
-    data: result,
+    data: null,
   });
 });
 
