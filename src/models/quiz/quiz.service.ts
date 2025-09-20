@@ -42,9 +42,9 @@ const generateQuiz = async (
 
     const quizData: ICreateQuizRequest = {
       title: `${request.subject} - ${request.topic} Quiz`,
-      description: `A ${request.difficulty} level quiz on ${request?.topic} for ${request.academicLevel} (Generated with ${aiProvider.toUpperCase()})`,
+      description: `A ${request.difficulty} level quiz on ${request.topic} for ${request.academicLevel} (Generated with ${aiProvider.toUpperCase()})`,
       subject: request.subject,
-      topic: request?.topic,
+      topic: request.topic,
       academicLevel: request.academicLevel,
       difficulty: request.difficulty,
       language: request.language,
@@ -52,15 +52,16 @@ const generateQuiz = async (
       timeLimit: request.timeLimit,
       instructions: request.instructions,
       isPublic: false,
-      tags: [request.subject, request?.topic, request.academicLevel],
+      tags: [request.subject, request.topic, request.academicLevel],
     };
 
     const response = await createQuiz(quizData, userId);
     return {
       quizId: response?._id.toString(),
     };
-  } catch (error) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to generate quiz');
+  } catch (error: any) {
+    console.error('Error in generateQuiz:', error);
+    throw new ApiError(StatusCodes.BAD_REQUEST, `Failed to generate quiz: ${error.message || error}`);
   }
 };
 
@@ -80,13 +81,13 @@ const createQuiz = async (
     config: {
       academicLevel: quizData.academicLevel,
       subject: quizData.subject,
-      topic: quizData?.topic,
+      topic: quizData.topic,
       language: quizData.language,
       questionType: determineQuestionType(quizData.questions),
       difficulty: quizData.difficulty,
       questionCount: quizData.questions.length,
-      timeLimit: quizData?.timeLimit,
-      instructions: quizData?.instructions,
+      timeLimit: quizData.timeLimit,
+      instructions: quizData.instructions,
     },
   });
 
