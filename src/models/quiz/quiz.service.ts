@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { Quiz } from './quiz.model';
 import { QuizAttempt } from '../quizAttempt/quizAttempt.model';
 import { OpenAIService } from '../../services/openai.service';
+import { GeminiService } from '../../services/gemini.service';
 import {
   IQuiz,
   IGenerateQuizRequest,
@@ -26,10 +27,22 @@ const generateQuiz = async (
   userId: string
 ): Promise<{ quizId: string }> => {
   try {
-    const generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
+    // Default to Gemini if no provider specified, or use specified provider
+    const aiProvider = request.aiProvider || 'gemini';
+
+    let generatedQuestions;
+
+    if (aiProvider === 'gemini') {
+      generatedQuestions = await GeminiService.geminiGenerateQuiz(request);
+    } else if (aiProvider === 'openai') {
+      generatedQuestions = await OpenAIService.openAIGenerateQuiz(request);
+    } else {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid AI provider specified');
+    }
+
     const quizData: ICreateQuizRequest = {
       title: `${request.subject} - ${request.topic} Quiz`,
-      description: `A ${request.difficulty} level quiz on ${request?.topic} for ${request.academicLevel}`,
+      description: `A ${request.difficulty} level quiz on ${request?.topic} for ${request.academicLevel} (Generated with ${aiProvider.toUpperCase()})`,
       subject: request.subject,
       topic: request?.topic,
       academicLevel: request.academicLevel,

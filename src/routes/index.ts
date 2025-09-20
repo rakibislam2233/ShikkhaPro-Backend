@@ -5,6 +5,7 @@ import { AuthRoutes } from '../models/auth/auth.routes';
 import { SettingsRoutes } from '../models/settings/settings.routes';
 import quizRoutes from '../models/quiz/quiz.routes';
 import questionRoutes from '../models/question/question.routes';
+import dashboardRoutes from '../models/dashboard/dashboard.routes';
 
 const router = express.Router();
 
@@ -32,6 +33,10 @@ const apiRoutes = [
   {
     path: '/questions',
     route: questionRoutes,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoutes,
   }
 ];
 

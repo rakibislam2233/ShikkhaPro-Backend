@@ -8,6 +8,7 @@ const academicLevelSchema = z.enum([
 const questionTypeSchema = z.enum(['mcq', 'short-answer', 'true-false', 'multiple-select', 'mixed']);
 const difficultySchema = z.enum(['easy', 'medium', 'hard']);
 const languageSchema = z.enum(['english', 'bengali', 'hindi']);
+const aiProviderSchema = z.enum(['openai', 'gemini']);
 
 const questionSchema = z.object({
   question: z.string().min(5, 'Question must be at least 5 characters').max(2000, 'Question too long'),
@@ -32,6 +33,7 @@ export const generateQuizValidation = z.object({
     questionCount: z.number().min(1).max(50),
     timeLimit: z.number().min(1).max(300).optional(),
     instructions: z.string().max(2000).optional(),
+    aiProvider: aiProviderSchema.optional(),
   }),
 });
 
