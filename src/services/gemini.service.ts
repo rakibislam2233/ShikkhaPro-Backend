@@ -118,18 +118,65 @@ Question Count: ${questionCount}`;
 
 const formatAcademicLevel = (level: AcademicLevel): string => {
   const levelMap: Record<AcademicLevel, string> = {
+    // Pre-Primary & Primary Education
+    'playgroup': 'Playgroup (Age 3-4)',
+    'nursery': 'Nursery (Age 4-5)',
+    'kg': 'Kindergarten (Age 5-6)',
     'class-1': 'Class 1 (Age 6-7)',
     'class-2': 'Class 2 (Age 7-8)',
     'class-3': 'Class 3 (Age 8-9)',
     'class-4': 'Class 4 (Age 9-10)',
     'class-5': 'Class 5 (Age 10-11)',
+
+    // Secondary Education
     'class-6': 'Class 6 (Age 11-12)',
     'class-7': 'Class 7 (Age 12-13)',
-    jsc: 'Junior School Certificate (JSC)',
-    ssc: 'Secondary School Certificate (SSC)',
-    hsc: 'Higher Secondary Certificate (HSC)',
-    bsc: 'Bachelor of Science (BSc)',
-    msc: 'Master of Science (MSc)',
+    'class-8': 'Class 8 (Age 13-14)',
+    'jsc': 'Junior School Certificate - JSC (Age 14)',
+    'class-9': 'Class 9 (Age 14-15)',
+    'class-10': 'Class 10 (Age 15-16)',
+    'ssc': 'Secondary School Certificate - SSC (Age 16)',
+
+    // Higher Secondary Education
+    'class-11': 'Class 11 (Age 16-17)',
+    'class-12': 'Class 12 (Age 17-18)',
+    'hsc': 'Higher Secondary Certificate - HSC (Age 18)',
+
+    // Undergraduate Education
+    'bachelor': 'Bachelor\'s Degree (General)',
+    'bsc': 'Bachelor of Science (BSc)',
+    'ba': 'Bachelor of Arts (BA)',
+    'bcom': 'Bachelor of Commerce (BCom)',
+    'bba': 'Bachelor of Business Administration (BBA)',
+    'btech': 'Bachelor of Technology (BTech)',
+    'beng': 'Bachelor of Engineering (BEng)',
+
+    // Postgraduate Education
+    'master': 'Master\'s Degree (General)',
+    'msc': 'Master of Science (MSc)',
+    'ma': 'Master of Arts (MA)',
+    'mcom': 'Master of Commerce (MCom)',
+    'mba': 'Master of Business Administration (MBA)',
+    'mtech': 'Master of Technology (MTech)',
+    'meng': 'Master of Engineering (MEng)',
+
+    // Professional & Competitive Exams
+    'bcs': 'Bangladesh Civil Service (BCS)',
+    'bank-job': 'Bank Job Preparation',
+    'medical': 'Medical Entrance Exams',
+    'engineering': 'Engineering Entrance Exams',
+    'university': 'University Admission Tests',
+    'ielts': 'IELTS Preparation',
+    'toefl': 'TOEFL Preparation',
+    'gre': 'GRE Preparation',
+    'sat': 'SAT Preparation',
+
+    // Professional Development
+    'professional': 'Professional Development',
+    'skill-development': 'Skill Development',
+    'certification': 'Professional Certifications',
+    'adult-learning': 'Adult Learning Programs',
+    'general': 'General Knowledge/Mixed Level',
   };
 
   return levelMap[level] || level;

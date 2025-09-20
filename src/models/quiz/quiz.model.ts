@@ -233,8 +233,8 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     },
     status: {
       type: String,
-      enum: ['draft', 'published', 'archived'],
-      default: 'published',
+      enum: ['active', 'deleted'],
+      default: 'active',
       index: true,
     },
   },
@@ -301,7 +301,7 @@ quizSchema.statics.getQuizzesByUser = async function (userId: string) {
 };
 
 quizSchema.statics.getPublicQuizzes = async function () {
-  return await this.find({ isPublic: true, status: 'published' }).sort({
+  return await this.find({ isPublic: true, status: 'active' }).sort({
     createdAt: -1,
   });
 };

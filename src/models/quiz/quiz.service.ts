@@ -97,7 +97,7 @@ const createQuiz = async (
 const getQuizById = async (quizId: string, userId?: string): Promise<IQuiz> => {
   const quiz = await Quiz.findOne({
     _id: quizId,
-    status: { $ne: 'archived' },
+    status: { $ne: 'deleted' },
   }).populate('createdBy', 'profile.fullName email');
   if (!quiz) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Quiz not found');
@@ -151,8 +151,8 @@ const deleteQuiz = async (quizId: string, userId: string): Promise<void> => {
     );
   }
 
-  // Soft delete by setting status to archived
-  quiz.status = 'archived';
+  // Soft delete by setting status to deleted
+  quiz.status = 'deleted';
   await quiz.save();
 };
 
@@ -163,7 +163,7 @@ const getUserQuizzes = async (
 ): Promise<IPaginateResult<IQuiz>> => {
   const query: any = {
     createdBy: filters?.userId,
-    status: { $ne: 'archived' },
+    status: { $ne: 'deleted' },
   };
 
   if (filters.academicLevel) {

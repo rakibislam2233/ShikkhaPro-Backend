@@ -122,8 +122,23 @@ const options: swaggerJSDoc.Options = {
             },
             academicLevel: {
               type: 'string',
-              enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc'],
-              description: 'Academic level',
+              enum: [
+                // Pre-Primary & Primary
+                'playgroup', 'nursery', 'kg', 'class-1', 'class-2', 'class-3', 'class-4', 'class-5',
+                // Secondary
+                'class-6', 'class-7', 'class-8', 'jsc', 'class-9', 'class-10', 'ssc',
+                // Higher Secondary
+                'class-11', 'class-12', 'hsc',
+                // Undergraduate
+                'bachelor', 'bsc', 'ba', 'bcom', 'bba', 'btech', 'beng',
+                // Postgraduate
+                'master', 'msc', 'ma', 'mcom', 'mba', 'mtech', 'meng',
+                // Professional & Competitive
+                'bcs', 'bank-job', 'medical', 'engineering', 'university', 'ielts', 'toefl', 'gre', 'sat',
+                // Professional Development
+                'professional', 'skill-development', 'certification', 'adult-learning', 'general'
+              ],
+              description: 'Academic level - from pre-primary to professional development',
               example: 'hsc',
             },
             difficulty: {
@@ -161,8 +176,8 @@ const options: swaggerJSDoc.Options = {
             },
             status: {
               type: 'string',
-              enum: ['draft', 'published', 'archived'],
-              default: 'published',
+              enum: ['active', 'deleted'],
+              default: 'active',
             },
             tags: {
               type: 'array',
@@ -263,7 +278,22 @@ const options: swaggerJSDoc.Options = {
             },
             academicLevel: {
               type: 'string',
-              enum: ['class-1', 'class-2', 'class-3', 'class-4', 'class-5', 'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc'],
+              enum: [
+                // Pre-Primary & Primary
+                'playgroup', 'nursery', 'kg', 'class-1', 'class-2', 'class-3', 'class-4', 'class-5',
+                // Secondary
+                'class-6', 'class-7', 'class-8', 'jsc', 'class-9', 'class-10', 'ssc',
+                // Higher Secondary
+                'class-11', 'class-12', 'hsc',
+                // Undergraduate
+                'bachelor', 'bsc', 'ba', 'bcom', 'bba', 'btech', 'beng',
+                // Postgraduate
+                'master', 'msc', 'ma', 'mcom', 'mba', 'mtech', 'meng',
+                // Professional & Competitive
+                'bcs', 'bank-job', 'medical', 'engineering', 'university', 'ielts', 'toefl', 'gre', 'sat',
+                // Professional Development
+                'professional', 'skill-development', 'certification', 'adult-learning', 'general'
+              ],
               example: 'hsc',
             },
             language: {
@@ -484,7 +514,7 @@ const options: swaggerJSDoc.Options = {
             },
             message: {
               type: 'string',
-              example: 'A new mathematics quiz has been published',
+              example: 'A new mathematics quiz has been activated',
             },
             type: {
               type: 'string',

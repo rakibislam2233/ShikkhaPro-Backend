@@ -2,18 +2,65 @@ import mongoose, { Model } from 'mongoose';
 import { IPaginateOptions, IPaginateResult } from '../../types/paginate';
 
 export type AcademicLevel =
-  | 'class-1'
-  | 'class-2'
-  | 'class-3'
-  | 'class-4'
-  | 'class-5'
-  | 'class-6'
-  | 'class-7'
-  | 'jsc'
-  | 'ssc'
-  | 'hsc'
-  | 'bsc'
-  | 'msc';
+  // Pre-Primary & Primary Education (Ages 3-10)
+  | 'playgroup'        // Playgroup (Age 3-4)
+  | 'nursery'          // Nursery (Age 4-5)
+  | 'kg'               // Kindergarten (Age 5-6)
+  | 'class-1'          // Class 1 (Age 6-7)
+  | 'class-2'          // Class 2 (Age 7-8)
+  | 'class-3'          // Class 3 (Age 8-9)
+  | 'class-4'          // Class 4 (Age 9-10)
+  | 'class-5'          // Class 5 (Age 10-11)
+
+  // Secondary Education (Ages 11-16)
+  | 'class-6'          // Class 6 (Age 11-12)
+  | 'class-7'          // Class 7 (Age 12-13)
+  | 'class-8'          // Class 8 (Age 13-14)
+  | 'jsc'              // Junior School Certificate (JSC/JDC)
+  | 'class-9'          // Class 9 (Age 14-15)
+  | 'class-10'         // Class 10 (Age 15-16)
+  | 'ssc'              // Secondary School Certificate (SSC)
+
+  // Higher Secondary Education (Ages 17-18)
+  | 'class-11'         // Class 11 (Age 16-17)
+  | 'class-12'         // Class 12 (Age 17-18)
+  | 'hsc'              // Higher Secondary Certificate (HSC)
+
+  // Undergraduate Education (Ages 18-22)
+  | 'bachelor'         // Bachelor's Degree (General)
+  | 'bsc'              // Bachelor of Science
+  | 'ba'               // Bachelor of Arts
+  | 'bcom'             // Bachelor of Commerce
+  | 'bba'              // Bachelor of Business Administration
+  | 'btech'            // Bachelor of Technology
+  | 'beng'             // Bachelor of Engineering
+
+  // Postgraduate Education (Ages 22+)
+  | 'master'           // Master's Degree (General)
+  | 'msc'              // Master of Science
+  | 'ma'               // Master of Arts
+  | 'mcom'             // Master of Commerce
+  | 'mba'              // Master of Business Administration
+  | 'mtech'            // Master of Technology
+  | 'meng'             // Master of Engineering
+
+  // Professional & Competitive Exams
+  | 'bcs'              // Bangladesh Civil Service
+  | 'bank-job'         // Bank Job Preparation
+  | 'medical'          // Medical Entrance Exams
+  | 'engineering'      // Engineering Entrance Exams
+  | 'university'       // University Admission Tests
+  | 'ielts'            // IELTS Preparation
+  | 'toefl'            // TOEFL Preparation
+  | 'gre'              // GRE Preparation
+  | 'sat'              // SAT Preparation
+
+  // Professional Development
+  | 'professional'     // Professional Development
+  | 'skill-development'// Skill Development
+  | 'certification'    // Professional Certifications
+  | 'adult-learning'   // Adult Learning Programs
+  | 'general'          // General Knowledge/Mixed Level;
 
 export type QuestionType =
   | 'mcq'
@@ -78,7 +125,7 @@ export interface IQuiz {
   config?: QuizConfig;
   attempts?: number;
   averageScore?: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'active' | 'deleted';
 }
 
 export interface QuizAttempt {
@@ -214,5 +261,5 @@ export interface IUpdateQuizRequest {
   isPublic?: boolean;
   tags?: string[];
   instructions?: string;
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'active' | 'deleted';
 }

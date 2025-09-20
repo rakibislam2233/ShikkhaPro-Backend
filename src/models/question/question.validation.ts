@@ -1,8 +1,26 @@
 import { z } from 'zod';
 
 const academicLevelSchema = z.enum([
-  'class-1', 'class-2', 'class-3', 'class-4', 'class-5', 
-  'class-6', 'class-7', 'jsc', 'ssc', 'hsc', 'bsc', 'msc'
+  // Pre-Primary & Primary Education
+  'playgroup', 'nursery', 'kg', 'class-1', 'class-2', 'class-3', 'class-4', 'class-5',
+
+  // Secondary Education
+  'class-6', 'class-7', 'class-8', 'jsc', 'class-9', 'class-10', 'ssc',
+
+  // Higher Secondary Education
+  'class-11', 'class-12', 'hsc',
+
+  // Undergraduate Education
+  'bachelor', 'bsc', 'ba', 'bcom', 'bba', 'btech', 'beng',
+
+  // Postgraduate Education
+  'master', 'msc', 'ma', 'mcom', 'mba', 'mtech', 'meng',
+
+  // Professional & Competitive Exams
+  'bcs', 'bank-job', 'medical', 'engineering', 'university', 'ielts', 'toefl', 'gre', 'sat',
+
+  // Professional Development
+  'professional', 'skill-development', 'certification', 'adult-learning', 'general'
 ]);
 
 const questionTypeSchema = z.enum(['mcq', 'short-answer', 'true-false', 'multiple-select']);
