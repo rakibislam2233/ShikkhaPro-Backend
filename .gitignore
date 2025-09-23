@@ -4,3 +4,8 @@ dist
 /winston
 .env
 .claude
+src/__tests__
+**/*.test.ts
+**/*.spec.ts
+jest.config.js
+coverage/

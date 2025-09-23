@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "vercel-build": "npm run build",
+    "build:prod": "tsc --project tsconfig.json",
+    "vercel-build": "npm run build:prod",
     "start": "node dist/server.js",
-    "postinstall": "npm run build",
+    "postinstall": "npm run build:prod",
     "seeder": "ts-node src/utils/seeder.ts",
     "seed:flights": "ts-node src/scripts/seedFlightData.ts",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
