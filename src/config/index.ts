@@ -94,15 +94,10 @@ export const config = {
   cors: {
     allowedOrigins: process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-      : ['http://localhost:5173/', 'http://localhost:3001'],
+      : ['http://localhost:5173', 'https://shikkha-pro-client.vercel.app'],
     developmentOrigins: process.env.DEV_ALLOWED_ORIGINS
       ? process.env.DEV_ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-      : [
-          'http://localhost:8080',
-          'http://localhost:8081',
-          'http://10.10.7.66:3000',
-          'http://localhost:5173',
-        ],
+      : ['http://localhost:5173', 'https://shikkha-pro-client.vercel.app'],
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',

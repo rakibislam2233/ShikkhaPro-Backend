@@ -1,11 +1,6 @@
 import { model, Schema } from 'mongoose';
 import paginate from '../../common/plugins/paginate';
-import {
-  IQuiz,
-  IQuizModel,
-  Question,
-  QuizConfig,
-} from './quiz.interface';
+import { IQuiz, IQuizModel, Question, QuizConfig } from './quiz.interface';
 
 const questionSchema = new Schema<Question>({
   id: {
@@ -68,19 +63,58 @@ const quizConfigSchema = new Schema<QuizConfig>({
     type: String,
     enum: [
       // Pre-Primary & Primary Education
-      'playgroup', 'nursery', 'kg', 'class-1', 'class-2', 'class-3', 'class-4', 'class-5',
+      'playgroup',
+      'nursery',
+      'kg',
+      'class-1',
+      'class-2',
+      'class-3',
+      'class-4',
+      'class-5',
       // Secondary Education
-      'class-6', 'class-7', 'class-8', 'jsc', 'class-9', 'class-10', 'ssc',
+      'class-6',
+      'class-7',
+      'class-8',
+      'jsc',
+      'class-9',
+      'class-10',
+      'ssc',
       // Higher Secondary Education
-      'class-11', 'class-12', 'hsc',
+      'class-11',
+      'class-12',
+      'hsc',
       // Undergraduate Education
-      'bachelor', 'bsc', 'ba', 'bcom', 'bba', 'btech', 'beng',
+      'bachelor',
+      'bsc',
+      'ba',
+      'bcom',
+      'bba',
+      'btech',
+      'beng',
       // Postgraduate Education
-      'master', 'msc', 'ma', 'mcom', 'mba', 'mtech', 'meng',
+      'master',
+      'msc',
+      'ma',
+      'mcom',
+      'mba',
+      'mtech',
+      'meng',
       // Professional & Competitive Exams
-      'bcs', 'bank-job', 'medical', 'engineering', 'university', 'ielts', 'toefl', 'gre', 'sat',
+      'bcs',
+      'bank-job',
+      'medical',
+      'engineering',
+      'university',
+      'ielts',
+      'toefl',
+      'gre',
+      'sat',
       // Professional Development
-      'professional', 'skill-development', 'certification', 'adult-learning', 'general'
+      'professional',
+      'skill-development',
+      'certification',
+      'adult-learning',
+      'general',
     ],
     required: true,
   },
@@ -128,7 +162,6 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       required: true,
       trim: true,
       maxlength: 200,
-      index: true,
     },
     description: {
       type: String,
@@ -139,45 +172,79 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     topic: {
       type: String,
       trim: true,
-      index: true,
     },
     academicLevel: {
       type: String,
       enum: [
         // Pre-Primary & Primary Education
-        'playgroup', 'nursery', 'kg', 'class-1', 'class-2', 'class-3', 'class-4', 'class-5',
+        'playgroup',
+        'nursery',
+        'kg',
+        'class-1',
+        'class-2',
+        'class-3',
+        'class-4',
+        'class-5',
         // Secondary Education
-        'class-6', 'class-7', 'class-8', 'jsc', 'class-9', 'class-10', 'ssc',
+        'class-6',
+        'class-7',
+        'class-8',
+        'jsc',
+        'class-9',
+        'class-10',
+        'ssc',
         // Higher Secondary Education
-        'class-11', 'class-12', 'hsc',
+        'class-11',
+        'class-12',
+        'hsc',
         // Undergraduate Education
-        'bachelor', 'bsc', 'ba', 'bcom', 'bba', 'btech', 'beng',
+        'bachelor',
+        'bsc',
+        'ba',
+        'bcom',
+        'bba',
+        'btech',
+        'beng',
         // Postgraduate Education
-        'master', 'msc', 'ma', 'mcom', 'mba', 'mtech', 'meng',
+        'master',
+        'msc',
+        'ma',
+        'mcom',
+        'mba',
+        'mtech',
+        'meng',
         // Professional & Competitive Exams
-        'bcs', 'bank-job', 'medical', 'engineering', 'university', 'ielts', 'toefl', 'gre', 'sat',
+        'bcs',
+        'bank-job',
+        'medical',
+        'engineering',
+        'university',
+        'ielts',
+        'toefl',
+        'gre',
+        'sat',
         // Professional Development
-        'professional', 'skill-development', 'certification', 'adult-learning', 'general'
+        'professional',
+        'skill-development',
+        'certification',
+        'adult-learning',
+        'general',
       ],
       required: true,
-      index: true,
     },
     difficulty: {
       type: String,
       enum: ['easy', 'medium', 'hard'],
       required: true,
-      index: true,
     },
     language: {
       type: String,
       enum: ['english', 'bengali', 'hindi'],
       required: true,
-      index: true,
     },
     questions: {
       type: [questionSchema],
@@ -192,23 +259,19 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
     timeLimit: {
       type: Number,
       min: 1,
-      index: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     isPublic: {
       type: Boolean,
       default: true,
-      index: true,
     },
     tags: {
       type: [String],
       default: [],
-      index: true,
     },
     estimatedTime: {
       type: Number,
@@ -239,7 +302,6 @@ const quizSchema = new Schema<IQuiz, IQuizModel>(
       type: String,
       enum: ['active', 'deleted'],
       default: 'active',
-      index: true,
     },
   },
   {

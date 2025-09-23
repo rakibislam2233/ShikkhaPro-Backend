@@ -1,13 +1,12 @@
 import { Schema, model } from 'mongoose';
-import { TOtp, OtpModel } from './otp.interface';
-import { OtpType } from './otp.interface';
+import { OtpModel, OtpType, TOtp } from './otp.interface';
 
 const otpSchema = new Schema<TOtp, OtpModel>(
   {
     userEmail: {
       type: String,
       required: true,
-      index: true,
+     
     },
     otp: {
       type: String,

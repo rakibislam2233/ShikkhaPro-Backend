@@ -11,7 +11,7 @@ const tokenSchema = new Schema<TToken, TokenModel>(
     token: {
       type: String,
       required: true,
-      index: true,
+     
     },
     type: {
       type: String,

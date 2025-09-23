@@ -1,11 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
+import paginate from '../../common/plugins/paginate';
 import {
-  IQuizAttempt,
   IQuizAttemptDocument,
   IQuizAttemptModel,
-  IQuizStats,
+  IQuizStats
 } from './quizAttempt.interface';
-import paginate from '../../common/plugins/paginate';
 
 const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
   {
@@ -13,13 +12,13 @@ const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
       type: Schema.Types.ObjectId,
       ref: 'Quiz',
       required: true,
-      index: true,
+     
     },
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
+     
     },
     answers: {
       type: Map,
@@ -33,7 +32,7 @@ const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
     },
     completedAt: {
       type: Date,
-      index: true,
+     
     },
     score: {
       type: Number,
@@ -60,7 +59,7 @@ const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
     isCompleted: {
       type: Boolean,
       default: false,
-      index: true,
+     
     },
     flaggedQuestions: {
       type: [String],
@@ -70,7 +69,7 @@ const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
       type: String,
       enum: ['in-progress', 'completed', 'abandoned'],
       default: 'in-progress',
-      index: true,
+     
     },
     timeLimit: {
       type: Number,

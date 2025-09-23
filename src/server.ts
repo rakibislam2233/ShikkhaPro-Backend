@@ -6,6 +6,11 @@ import { errorLogger, logger } from './shared/logger';
 import { config } from './config';
 import { socketHelper } from './socket/socket';
 
+// Global type declaration
+declare global {
+  var io: Server;
+}
+
 // Type for server instance
 let server: any;
 
@@ -27,20 +32,19 @@ const connectToDatabase = async (): Promise<void> => {
       family: 4,
     });
     logger.info('🚀 Database connected successfully');
-    
+
     // Set up mongoose connection event listeners
-    mongoose.connection.on('error', (error) => {
+    mongoose.connection.on('error', error => {
       errorLogger.error('MongoDB connection error:', error);
     });
-    
+
     mongoose.connection.on('disconnected', () => {
       logger.warn('MongoDB disconnected');
     });
-    
+
     mongoose.connection.on('reconnected', () => {
       logger.info('MongoDB reconnected');
     });
-    
   } catch (error) {
     errorLogger.error('🤢 Failed to connect to Database', error);
     throw error;
@@ -51,10 +55,13 @@ const connectToDatabase = async (): Promise<void> => {
  * Start the HTTP server
  */
 const startServer = (): void => {
-  const port = typeof config.port === 'number' ? config.port : Number(config.port);
-  
+  const port =
+    typeof config.port === 'number' ? config.port : Number(config.port);
+
   server = app.listen(port, config.backend.ip as string, () => {
-    logger.info(`♻️  Application listening on port ${config.backend.baseUrl}/test`);
+    logger.info(
+      `♻️  Application listening on port ${config.backend.baseUrl}/test`
+    );
   });
 
   // Handle server errors
@@ -71,23 +78,17 @@ const setupSocketIO = (): void => {
     pingTimeout: 60000,
     cors: {
       origin: [
-        'http://localhost:3000',
         'http://localhost:5173',
-        'https://rakib3000.sobhoy.com',
-        'http://10.0.80.220:3000',
-        'http://10.0.80.220:7002',
-        'http://10.0.80.220:4173',
-        'http://localhost:7003',
-        'https://rakib7002.sobhoy.com',
+        'https://shikkha-pro-client.vercel.app',
       ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
   });
-  
+
   socketHelper.socket(io);
   global.io = io;
-  
+
   logger.info('Socket.IO server initialized');
 };
 
@@ -96,7 +97,7 @@ const setupSocketIO = (): void => {
  */
 const gracefulShutdown = (signal: string): void => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
-  
+
   if (server) {
     server.close(async (error?: Error) => {
       if (error) {
@@ -104,7 +105,7 @@ const gracefulShutdown = (signal: string): void => {
       } else {
         logger.info('HTTP server closed');
       }
-      
+
       try {
         await mongoose.connection.close();
         logger.info('Database connection closed');
@@ -114,10 +115,12 @@ const gracefulShutdown = (signal: string): void => {
         process.exit(1);
       }
     });
-    
+
     // Force close after timeout
     setTimeout(() => {
-      logger.error('Could not close connections in time, forcefully shutting down');
+      logger.error(
+        'Could not close connections in time, forcefully shutting down'
+      );
       process.exit(1);
     }, 10000);
   } else {
@@ -132,14 +135,13 @@ async function main() {
   try {
     // Connect to database
     await connectToDatabase();
-    
+
     // Start HTTP server
     startServer();
-    
+
     // Setup Socket.IO
     setupSocketIO();
     logger.info('🚀 Application started successfully');
-    
   } catch (error) {
     errorLogger.error('❌ Application failed to start:', error);
     process.exit(1);
@@ -150,10 +152,13 @@ async function main() {
 main();
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
-  errorLogger.error('Unhandled Promise Rejection:', { reason, promise });
-  gracefulShutdown('UNHANDLED_REJECTION');
-});
+process.on(
+  'unhandledRejection',
+  (reason: unknown, promise: Promise<unknown>) => {
+    errorLogger.error('Unhandled Promise Rejection:', { reason, promise });
+    gracefulShutdown('UNHANDLED_REJECTION');
+  }
+);
 
 // Handle SIGTERM
 process.on('SIGTERM', () => {

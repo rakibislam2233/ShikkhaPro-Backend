@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "vercel-build": "npm run build",
     "start": "node dist/server.js",
     "seeder": "ts-node src/utils/seeder.ts",
     "seed:flights": "ts-node src/scripts/seedFlightData.ts",

@@ -13,13 +13,13 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
       required: true,
       trim: true,
       maxlength: 2000,
-      index: true,
+     
     },
     type: {
       type: String,
       enum: ['mcq', 'short-answer', 'true-false', 'multiple-select'],
       required: true,
-      index: true,
+     
     },
     options: {
       type: [String],
@@ -51,7 +51,7 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
       type: String,
       enum: ['easy', 'medium', 'hard'],
       required: true,
-      index: true,
+     
     },
     points: {
       type: Number,
@@ -64,7 +64,7 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
       type: String,
       required: true,
       trim: true,
-      index: true,
+     
     },
     topic: {
       type: String,
@@ -88,18 +88,18 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
         'msc',
       ],
       required: true,
-      index: true,
+     
     },
     language: {
       type: String,
       enum: ['english', 'bengali', 'hindi'],
       required: true,
-      index: true,
+     
     },
     category: {
       type: String,
       trim: true,
-      index: true,
+     
     },
     tags: {
       type: [String],
@@ -109,12 +109,12 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
+     
     },
     isApproved: {
       type: Boolean,
       default: false,
-      index: true,
+     
     },
     usageCount: {
       type: Number,
@@ -138,7 +138,6 @@ const questionSchema = new Schema<IQuestion, IQuestionModel>(
 questionSchema.index({ subject: 1, academicLevel: 1 });
 questionSchema.index({ difficulty: 1, type: 1 });
 questionSchema.index({ createdBy: 1, isApproved: 1 });
-questionSchema.index({ tags: 1 });
 questionSchema.index({ usageCount: -1 });
 questionSchema.index({ createdAt: -1 });
 

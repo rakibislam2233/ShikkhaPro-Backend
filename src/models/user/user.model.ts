@@ -1,18 +1,18 @@
-import mongoose, { Schema } from 'mongoose';
-import {
-  IMetadata,
-  IPreferences,
-  IProfile,
-  ISecurity,
-  ISocialAccount,
-  IUser,
-  IUserModel,
-  UserRoles,
-  UserStatus,
-} from './user.interface';
 import bcrypt from 'bcrypt';
-import { config } from '../../config';
+import mongoose, { Schema } from 'mongoose';
 import paginate from '../../common/plugins/paginate';
+import { config } from '../../config';
+import {
+    IMetadata,
+    IPreferences,
+    IProfile,
+    ISecurity,
+    ISocialAccount,
+    IUser,
+    IUserModel,
+    UserRoles,
+    UserStatus,
+} from './user.interface';
 
 const profileSchame = new Schema<IProfile>({
   fullName: String,
@@ -69,7 +69,7 @@ const userSchema = new Schema<IUser, IUserModel>(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
+     
     },
     password: {
       type: String,
@@ -80,7 +80,7 @@ const userSchema = new Schema<IUser, IUserModel>(
       type: String,
       enum: UserRoles,
       default: UserRoles.User,
-      index: true,
+     
     },
     status: {
       type: String,
@@ -90,7 +90,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     isResetPassword: {
       type: Boolean,
       default: false,
-      index: true,
+     
     },
     preferences: {
       type: preferencesSchema,
