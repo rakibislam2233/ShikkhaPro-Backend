@@ -54,7 +54,7 @@ const quizAttemptSchema = new Schema<IQuizAttemptDocument, IQuizAttemptModel>(
       min: 0,
     },
     timeSpent: {
-      type: Number,
+      type: Number, // in seconds
       min: 0,
     },
     isCompleted: {
@@ -271,7 +271,7 @@ quizAttemptSchema.statics.getLeaderboard = async function(quizId?: string, limit
 quizAttemptSchema.pre('save', function(next) {
   if (this.isModified('completedAt') && this.completedAt && this.startedAt) {
     const timeDiff = this.completedAt.getTime() - this.startedAt.getTime();
-    this.timeSpent = Math.round(timeDiff / (1000 * 60)); // Convert to minutes
+    this.timeSpent = Math.round(timeDiff / 1000); // Convert to seconds
   }
   next();
 });

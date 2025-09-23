@@ -13,7 +13,7 @@ export interface IQuizAttempt {
   totalScore?: number;
   totalQuestions: number;
   correctAnswers: number;
-  timeSpent?: number; // in minutes
+  timeSpent?: number; // in seconds
   isCompleted: boolean;
   flaggedQuestions: string[];
   status: 'in-progress' | 'completed' | 'abandoned';
@@ -96,6 +96,6 @@ export interface ISubmitAnswerRequest {
 export interface ISaveAnswerRequest {
   quizId: string;
   answers: { [questionId: string]: string | string[] };
-  timeSpent?: number; // in minutes, time spent on the quiz from frontend
+  timeSpent?: number; // in seconds, time spent on the quiz from frontend
   startedAt?: Date; // when the quiz was actually started
 }

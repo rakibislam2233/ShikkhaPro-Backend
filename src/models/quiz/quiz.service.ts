@@ -211,8 +211,8 @@ const submitAnswer = async (request: ISubmitAnswerRequest, userId: string) => {
   // Check if time limit exceeded
   if (attempt.timeLimit) {
     const timeElapsed =
-      (Date.now() - attempt.startedAt.getTime()) / (1000 * 60); // in minutes
-    if (timeElapsed > attempt.timeLimit) {
+      (Date.now() - attempt.startedAt.getTime()) / 1000; // in seconds
+    if (timeElapsed > attempt.timeLimit * 60) { // timeLimit is still in minutes
       attempt.status = 'completed';
       attempt.completedAt = new Date();
       await attempt.save();
@@ -237,7 +237,7 @@ const startQuiz = async (quizId: string, userId: string) => {
     totalQuestions: quiz.questions.length,
     timeLimit: quiz.estimatedTime,
   });
-  return { attemptId: attempt._id };
+  return { attemptId: attempt._id, startedAt: attempt.startedAt };
 };
 
 const submitQuizAnswer = async (
@@ -263,15 +263,21 @@ const submitQuizAnswer = async (
     existingAttempt.status = 'completed';
     existingAttempt.isCompleted = true;
     existingAttempt.completedAt = new Date();
+
+    // Calculate time spent in seconds
+    const timeDiff = existingAttempt.completedAt.getTime() - existingAttempt.startedAt.getTime();
+    existingAttempt.timeSpent = Math.round(timeDiff / 1000); // Convert to seconds
+
     await existingAttempt.calculateScore(quiz);
     return {
       attemptId: existingAttempt._id,
     };
   }
 
+  // If timeSpent is provided from frontend, it should be in seconds
   const startedAt =
     request.startedAt ||
-    new Date(Date.now() - (request.timeSpent || 0) * 60 * 1000);
+    new Date(Date.now() - (request.timeSpent || 0) * 1000); // timeSpent is in seconds
 
   const attempt = new QuizAttempt({
     quizId: request.quizId,
@@ -284,6 +290,15 @@ const submitQuizAnswer = async (
   attempt.status = 'completed';
   attempt.isCompleted = true;
   attempt.completedAt = new Date();
+
+  // Calculate time spent in seconds if not provided
+  if (!request.timeSpent) {
+    const timeDiff = attempt.completedAt.getTime() - attempt.startedAt.getTime();
+    attempt.timeSpent = Math.round(timeDiff / 1000); // Convert to seconds
+  } else {
+    attempt.timeSpent = request.timeSpent; // Already in seconds from frontend
+  }
+
   await attempt.calculateScore(quiz);
 
   return {
@@ -398,8 +413,8 @@ const generateQuizResult = (
 
   const percentage =
     totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
-  const timeSpent = attempt.timeSpent || 0;
-  const averageTimePerQuestion = timeSpent / quiz.questions.length;
+  const timeSpent = attempt?.timeSpent || 0; // Now in seconds
+  const averageTimePerQuestion = timeSpent / quiz.questions.length; // Average in seconds
 
   // Bangladesh grading system
   let grade = 'F';
