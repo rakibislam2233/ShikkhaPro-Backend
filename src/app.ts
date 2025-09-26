@@ -8,7 +8,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import path from 'path';
-const xss = require('xss-clean');
+const xss = require('express-xss-sanitizer');
 
 import i18nextMiddleware from 'i18next-express-middleware';
 import { config } from './config';
