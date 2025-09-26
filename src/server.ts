@@ -1,15 +1,8 @@
 import colors from 'colors';
 import mongoose from 'mongoose';
-import { Server } from 'socket.io';
 import app from './app';
 import { errorLogger, logger } from './shared/logger';
 import { config } from './config';
-import { socketHelper } from './socket/socket';
-
-// Global type declaration
-declare global {
-  var io: Server;
-}
 
 // Type for server instance
 let server: any;
@@ -70,27 +63,6 @@ const startServer = (): void => {
   });
 };
 
-/**
- * Setup Socket.IO
- */
-const setupSocketIO = (): void => {
-  const io = new Server(server, {
-    pingTimeout: 60000,
-    cors: {
-      origin: [
-        'http://localhost:5173',
-        'https://shikkha-pro-client.vercel.app',
-      ],
-      methods: ['GET', 'POST'],
-      credentials: true,
-    },
-  });
-
-  socketHelper.socket(io);
-  global.io = io;
-
-  logger.info('Socket.IO server initialized');
-};
 
 /**
  * Graceful shutdown handler
@@ -139,8 +111,6 @@ async function main() {
     // Start HTTP server
     startServer();
 
-    // Setup Socket.IO
-    setupSocketIO();
     logger.info('🚀 Application started successfully');
   } catch (error) {
     errorLogger.error('❌ Application failed to start:', error);

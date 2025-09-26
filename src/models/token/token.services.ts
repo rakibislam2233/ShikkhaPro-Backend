@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import jwt, { Secret } from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { config } from '../../config';
 import { Token } from './token.model';
 import { TokenType } from './token.interface';
@@ -22,8 +22,8 @@ const getExpirationTime = (expiration: string) => {
   return new Date();
 };
 
-const generateToken = (payload: object, secret: Secret, expireTime: string) => {
-  return jwt.sign(payload, secret, { expiresIn: expireTime });
+const generateToken = (payload: object, secret: Secret, expireTime: string): string => {
+  return jwt.sign(payload, secret as string, { expiresIn: expireTime } as SignOptions);
 };
 
 const saveToken = async (

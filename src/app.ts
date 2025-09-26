@@ -9,9 +9,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import path from 'path';
 
-import i18nextMiddleware from 'i18next-express-middleware';
 import { config } from './config';
-import i18next from './i18n/i18n';
 import globalErrorHandler from './middlewares/globalErrorHandler';
 import notFound from './middlewares/notFound';
 import router from './routes';
@@ -334,8 +332,7 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
 // General Middlewares
 // =====================
 
-// i18next middleware
-app.use(i18nextMiddleware.handle(i18next));
+// i18next middleware removed
 
 // =====================
 // Security Middlewares
