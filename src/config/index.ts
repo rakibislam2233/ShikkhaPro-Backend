@@ -4,18 +4,14 @@ dotenv.config();
 export const config = {
   environment: process.env.NODE_ENV,
   port: process.env.PORT || 8083,
+
   database: {
-    mongoUrl:
-      process.env.MONGODB_URL || 'mongodb://localhost:27017/shikkaPro-website',
+    mongoUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017/shikkaPro-website',
   },
 
   jwt: {
-    accessSecret:
-      process.env.JWT_ACCESS_SECRET ||
-      '1018b783185a124050d697313a5dc97f4b7e7f66f4fb82bc7f2998303e48604c',
-    refreshSecret:
-      process.env.JWT_REFRESH_SECRET ||
-      'bc4b3506f99e4254fc3b8382bf135ffec4a4adf043720555dd0849cb51aa5b02',
+    accessSecret: process.env.JWT_ACCESS_SECRET || '1018b783185a124050d697313a5dc97f4b7e7f66f4fb82bc7f2998303e48604c',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'bc4b3506f99e4254fc3b8382bf135ffec4a4adf043720555dd0849cb51aa5b02',
     accessExpiration: process.env.JWT_ACCESS_EXPIRATION_TIME || '5d',
     refreshExpiration: process.env.JWT_REFRESH_EXPIRATION_TIME || '365d',
   },
@@ -26,11 +22,8 @@ export const config = {
   },
 
   token: {
-    TokenSecret:
-      process.env.TOKEN_SECRET ||
-      '065ec2afe73bb1e47454907a56146e5b75ee441af05fe5bb82bdf169a1901d26',
-    resetPasswordTokenExpiration:
-      process.env.RESET_PASSWORD_TOKEN_EXPIRATION_TIME || '30m',
+    TokenSecret: process.env.TOKEN_SECRET || '065ec2afe73bb1e47454907a56146e5b75ee441af05fe5bb82bdf169a1901d26',
+    resetPasswordTokenExpiration: process.env.RESET_PASSWORD_TOKEN_EXPIRATION_TIME || '30m',
   },
 
   otp: {
