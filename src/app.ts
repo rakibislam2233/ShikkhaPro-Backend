@@ -8,7 +8,6 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import path from 'path';
-const xss = require('express-xss-sanitizer');
 
 import i18nextMiddleware from 'i18next-express-middleware';
 import { config } from './config';
@@ -356,8 +355,7 @@ app.use(getHelmetConfig(allowedOrigins));
 // Additional security headers
 app.use(getAdditionalSecurityHeaders());
 
-// XSS Protection
-app.use(xss());
+// XSS Protection - Removed for compatibility
 
 // NoSQL Injection Protection
 app.use(getMongoSanitizeConfig());

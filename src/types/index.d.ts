@@ -17,7 +17,8 @@ declare global {
 
 declare module 'express-xss-sanitizer' {
   import { RequestHandler } from 'express';
-  export const xss: RequestHandler;
+  export function xss(): RequestHandler;
+  export default function(): RequestHandler;
 }
 
 declare module 'xss-clean' {
