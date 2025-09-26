@@ -37,7 +37,17 @@ const baseConfig = {
 // Production-optimized transports
 const productionTransports = [
   new transports.Console({
-    level: 'error', // Only log errors to console in production
+    level: 'info', // Show info logs in production for startup/database status
+    format: combine(
+      format.colorize(),
+      label({ label: 'ShikkaPro-Backend' }),
+      timestamp(),
+      printf(({ level, message, label, timestamp }: any) => {
+        const date = new Date(timestamp);
+        const time = date.toLocaleTimeString();
+        return `${time} [${label}] ${level}: ${message}`;
+      })
+    )
   }),
   new DailyRotateFile({
     filename: path.join(
@@ -56,7 +66,19 @@ const productionTransports = [
 
 // Development transports
 const developmentTransports = [
-  new transports.Console(),
+  new transports.Console({
+    level: 'info',
+    format: combine(
+      format.colorize(),
+      label({ label: 'ShikkaPro-Backend' }),
+      timestamp(),
+      printf(({ level, message, label, timestamp }: any) => {
+        const date = new Date(timestamp);
+        const time = date.toLocaleTimeString();
+        return `${time} [${label}] ${level}: ${message}`;
+      })
+    )
+  }),
   new DailyRotateFile({
     filename: path.join(
       process.cwd(),
@@ -82,12 +104,23 @@ const logger = createLogger({
 const errorLogger = createLogger({
   level: 'error',
   format: combine(
-    label({ label: 'ShikkaPro-Website-Backend' }),
+    label({ label: 'ShikkaPro-Backend' }),
     timestamp(),
     myFormat
   ),
   transports: [
-    new transports.Console(),
+    new transports.Console({
+      format: combine(
+        format.colorize(),
+        label({ label: 'ShikkaPro-Backend' }),
+        timestamp(),
+        printf(({ level, message, label, timestamp }: any) => {
+          const date = new Date(timestamp);
+          const time = date.toLocaleTimeString();
+          return `${time} [${label}] ${level}: ${message}`;
+        })
+      )
+    }),
     new DailyRotateFile({
       filename: path.join(
         process.cwd(),

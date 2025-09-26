@@ -18,6 +18,9 @@ process.on('uncaughtException', error => {
  */
 const connectToDatabase = async (): Promise<void> => {
   try {
+    logger.info('🔄 Attempting to connect to MongoDB...');
+    logger.info(`📍 Database URL: ${config.database.mongoUrl?.substring(0, 20)}...`);
+
     await mongoose.connect(config.database.mongoUrl as string, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
@@ -51,10 +54,17 @@ const startServer = (): void => {
   const port =
     typeof config.port === 'number' ? config.port : Number(config.port);
 
+  logger.info(`🌐 Starting server on ${config.backend.ip}:${port}`);
+  logger.info(`🔧 Environment: ${config.environment}`);
+
   server = app.listen(port, config.backend.ip as string, () => {
-    logger.info(
-      `♻️  Application listening on port ${config.backend.baseUrl}/test`
-    );
+    logger.info('🎉 ================================================');
+    logger.info(`🚀 ShikkaPro Backend Server is running!`);
+    logger.info(`📍 Local: http://localhost:${port}`);
+    logger.info(`🌍 Network: http://${config.backend.ip}:${port}`);
+    logger.info(`🔗 API Base: ${config.backend.baseUrl}`);
+    logger.info(`🧪 Test endpoint: ${config.backend.baseUrl}/test`);
+    logger.info('🎉 ================================================');
   });
 
   // Handle server errors
@@ -105,13 +115,18 @@ const gracefulShutdown = (signal: string): void => {
  */
 async function main() {
   try {
+    logger.info('🏁 Starting ShikkaPro Backend Application...');
+    logger.info(`📦 Node.js version: ${process.version}`);
+    logger.info(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`📁 Working directory: ${process.cwd()}`);
+
     // Connect to database
     await connectToDatabase();
 
     // Start HTTP server
     startServer();
 
-    logger.info('🚀 Application started successfully');
+    logger.info('✅ Application started successfully');
   } catch (error) {
     errorLogger.error('❌ Application failed to start:', error);
     process.exit(1);
