@@ -1,7 +1,7 @@
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import csrf from 'csurf';
+// import csrf from 'csurf'; // Removed deprecated package
 import express, { NextFunction, Request, Response } from 'express';
 import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
@@ -106,22 +106,13 @@ const getRateLimiter = () => {
 };
 
 /**
- * Configure CSRF protection
+ * Configure CSRF protection - Disabled for serverless compatibility
  */
 const getCsrfProtection = () => {
-  const ignoreMethods =
-    process.env.NODE_ENV === 'development'
-      ? ['GET', 'HEAD', 'OPTIONS', 'DELETE', 'POST', 'PATCH', 'PUT']
-      : ['GET', 'HEAD', 'OPTIONS'];
-
-  return csrf({
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    },
-    ignoreMethods,
-  });
+  // CSRF disabled for serverless deployment compatibility
+  return (req: Request, res: Response, next: NextFunction) => {
+    next();
+  };
 };
 
 /**
